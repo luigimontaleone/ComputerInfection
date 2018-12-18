@@ -5,9 +5,9 @@
 class Enemy : public Entity
 {
     private:
-        
+        bool is_boss;
     public:
-        Enemy(int x, int y, string path);
+        Enemy(int x, int y, string path, bool is_boss);
         void moveEnemy();        
 };
 #endif

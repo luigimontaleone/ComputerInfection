@@ -18,6 +18,7 @@ class GameHandler
         ALLEGRO_BITMAP *background;
         ALLEGRO_TIMER *timer;
         bool redraw;
+        int logic_map[10][10];
         const float FPS;
 
     public:
@@ -25,4 +26,9 @@ class GameHandler
         void Game();
         void printBG();
         void scale();
+        void load_map();
+        void read_map(bool);
+        int read_something_from_map(int, int);
+        void movePlayer(ALLEGRO_EVENT);
+        bool collisionPlayer(int,int);
 };

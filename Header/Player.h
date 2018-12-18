@@ -21,11 +21,10 @@ class Player : public Entity
         int getScore();
         void decreaseLives();
         void increaseScore();  
-        void movePlayer(ALLEGRO_EVENT);
         void moveUp();
         void moveDown();
         void moveRight();
         void moveLeft();
-        bool collisionPlayer(int,int);
+        int getSpeed();
 };
 #endif

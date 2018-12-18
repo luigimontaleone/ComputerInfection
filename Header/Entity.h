@@ -7,7 +7,8 @@
 #include "allegro5/allegro_primitives.h"
 #include <string>
 #include <iostream>
-
+#include <fstream>
+#include <cstdlib>
 using namespace std;
 
 class Entity
@@ -20,10 +21,12 @@ class Entity
 
     public:
         Entity(int x, int y, string path, int size);
+        Entity();
         void setX(int X);
         int getX();
         void setY(int Y);
         int getY();
         void print();
+        int getSize();
 };
 #endif
