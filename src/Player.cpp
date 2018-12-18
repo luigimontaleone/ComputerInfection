@@ -1,7 +1,38 @@
 #include"../Header/Player.h"
-Player::Player(int x_init, int y_init, string path): x_init(x_init), y_init(y_init), x(x_init), y(y_init)
+Player::Player(int x_init, int y_init, string path): x_init(x_init), y_init(y_init), Entity(x_init, y_init, path)
 {
     lives = 3;
     score = 0;
-    sprite = al_load_bitmap(path.c_str());
+}
+void Player::setXinit(int X)
+{
+    x_init = X;
+}
+int Player::getXinit()
+{
+    return x_init;
+}
+void Player::setYinit(int Y)
+{
+    y_init = Y;
+}
+int Player::getYinit()
+{
+    return y_init;
+}
+int Player::getLives()
+{
+    return lives;
+}
+int Player::getScore()
+{
+    return score;
+}
+void Player::decreaseLives()
+{
+    lives--;
+}
+void Player::increaseScore()
+{
+    score += 100;
 }
