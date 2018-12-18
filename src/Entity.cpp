@@ -1,5 +1,5 @@
 #include "../Header/Entity.h"
-Entity::Entity(int x, int y, string path): x(x), y(y)
+Entity::Entity(int x, int y, string path, int s): x(x), y(y), size(s) 
 {
     sprite = al_load_bitmap(path.c_str());
 }
@@ -18,4 +18,8 @@ void Entity::setY(int Y)
 int Entity::getY()
 {
     return y;
+}
+void Entity::print()
+{
+    al_draw_bitmap(sprite,x,y,0);
 }

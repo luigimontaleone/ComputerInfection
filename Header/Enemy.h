@@ -8,6 +8,6 @@ class Enemy : public Entity
         
     public:
         Enemy(int x, int y, string path);
-        
+        void moveEnemy();        
 };
 #endif

@@ -17,6 +17,11 @@ int main()
         cout<<"failed primitives addon";
         return -1;
     }
+    if(!al_install_keyboard())
+    {
+        cout<<"failed install keyboard";
+        return -1;
+    }
     GameHandler gamehandler;
     gamehandler.Game();
     return 0;

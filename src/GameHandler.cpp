@@ -33,23 +33,26 @@ void GameHandler::Game()
     printBG();
     ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
+	al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     while(1)
     {
+        al_clear_to_color(al_map_rgb(0,0,0));
         ALLEGRO_EVENT ev;
         al_wait_for_event(event_queue, &ev);
         if(ev.type == ALLEGRO_EVENT_TIMER)
             redraw = true;
         else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) 
             break;
+        printBG();
+        player->movePlayer(ev);
+        al_flip_display();
     }
 }
 void GameHandler::printBG()
 {
     //al_draw_scaled_bitmap(background_bw, 200, 0, 600, 600, scaleX, scaleY, 0, 0, 0);
     al_draw_bitmap(background_bw, 200, 0, 0);
-    al_flip_display();
-    al_rest(4.0);
 }
 void GameHandler::scale()
 {

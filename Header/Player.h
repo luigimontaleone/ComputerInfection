@@ -9,6 +9,7 @@ class Player : public Entity
         int y_init;
         int lives;
         int score;
+        const int speed;
         
     public:
         Player(int x_init, int y_init, string path);
@@ -20,5 +21,11 @@ class Player : public Entity
         int getScore();
         void decreaseLives();
         void increaseScore();  
+        void movePlayer(ALLEGRO_EVENT);
+        void moveUp();
+        void moveDown();
+        void moveRight();
+        void moveLeft();
+        bool collisionPlayer(int,int);
 };
 #endif

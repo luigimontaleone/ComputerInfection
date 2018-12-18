@@ -25,5 +25,4 @@ class GameHandler
         void Game();
         void printBG();
         void scale();
-
 };

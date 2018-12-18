@@ -12,16 +12,18 @@ using namespace std;
 
 class Entity
 {
-    private:
+    protected:
         int x;
         int y;
+        int size;
         ALLEGRO_BITMAP *sprite;
 
     public:
-        Entity(int x, int y, string path);
+        Entity(int x, int y, string path, int size);
         void setX(int X);
         int getX();
         void setY(int Y);
         int getY();
+        void print();
 };
 #endif
