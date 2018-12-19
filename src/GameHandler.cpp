@@ -1,9 +1,9 @@
 #include "../Header/GameHandler.h"
 
-GameHandler::GameHandler(): width(800), height(600), FPS(60)
+GameHandler::GameHandler(): width(830), height(630), FPS(60)
 {
-    //al_get_display_mode(al_get_num_display_modes()-1, &disp_data);
-    //al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+    rows = 40;
+    cols = 40;
     redraw = true;
     display = al_create_display(width, height);
     if(!display)
@@ -14,7 +14,6 @@ GameHandler::GameHandler(): width(800), height(600), FPS(60)
     timer = al_create_timer(1.0 / FPS);
     load_map();
     read_map(true);
-    //boss = new Enemy(1, 2, "../Images/enemy.png");
     background_bw = al_load_bitmap("../Images/backgroundBW.png");
     if (!background_bw)
     {
@@ -90,7 +89,7 @@ void GameHandler::load_map()
     {
         map>>logic_map[i][j];
         j++;
-        if(j >= 10)
+        if(j >= cols)
         {
             j = 0;
             i++;
@@ -101,19 +100,19 @@ void GameHandler::load_map()
 void GameHandler::read_map(bool create)
 {
     bool create2=create;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < rows; i++)
     {
-        for (int j = 0; j < 10; j++)
+        for (int j = 0; j < cols; j++)
         {
 
             if (logic_map[i][j] == 3 && create)
             {
-                boss = new Enemy(j *80 /** 64*/ + 200, i * 60 /** 64*/, "../Images/enemy.png", true);
+                boss = new Enemy(j * 15 + 200, i * 15 , "../Images/enemy.png", true);
                 create = false;
             }
             else if (logic_map[i][j] == 1 && create2)
             {
-                player = new Player(j*80 /* * 32*/ + 200, i *60 /** 32*/, "../Images/pc.png");
+                player = new Player(j * 15 + 200, i * 15, "../Images/pc.png");
                 create2 = false;
             }
 
@@ -164,26 +163,18 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
     player->print();
 }
 bool GameHandler::collisionPlayer(int x, int y)
-{    if (x < 200 || y < 0 || x > width - player->getSize() || y > height - player->getSize())
+{    
+    if (x < 200 || y < 0 || x > width - player->getSize() || y > height - player->getSize())
         return false;
-    //x+=32;
-    //y+=32;
-    x = (x) /80; // player->getSize();
-    y = y/60;// player->getSize();
+
+    x = (x - 200) / 15;
+    y = y / 15;
     //x--;
     //y--;
 
 
     cout<<"x: "<<x<<" y:"<<y<<endl;
-    //for(int i=0;i<player->getSize()-1;i++)
-    //{ 
-      //  for(int j=0;j<player->getSize()-1;j++)
-       // {
             if(read_something_from_map(y, x) != 1)
                 return false;
-       // }
-    //}
-
     return true;
 }
-//x : 800 = k : 10

@@ -18,7 +18,9 @@ class GameHandler
         ALLEGRO_BITMAP *background;
         ALLEGRO_TIMER *timer;
         bool redraw;
-        int logic_map[10][10];
+        int logic_map[40][40];
+        int rows;
+        int cols;
         const float FPS;
 
     public:
