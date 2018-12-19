@@ -7,7 +7,7 @@ class GameHandler
         ALLEGRO_DISPLAY *display;
         Player *player;
         Enemy *boss;
-        Enemy **enemies;
+        vector<Enemy*> enemies;
         const int width;
         const int height;
         /*int scaleW;
@@ -32,5 +32,6 @@ class GameHandler
         void read_map(bool);
         int read_something_from_map(int, int);
         void movePlayer(ALLEGRO_EVENT);
-        bool collisionPlayer(int,int);
+        void moveEnemy(int, bool);
+        bool collision(int, int, bool);
 };

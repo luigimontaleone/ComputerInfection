@@ -9,7 +9,6 @@ class Player : public Entity
         int y_init;
         int lives;
         int score;
-        const int speed;
         
     public:
         Player(int x_init, int y_init, string path);
@@ -25,6 +24,5 @@ class Player : public Entity
         void moveDown();
         void moveRight();
         void moveLeft();
-        int getSpeed();
 };
 #endif

@@ -9,6 +9,8 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <time.h>
+#include <vector>
 using namespace std;
 
 class Entity
@@ -17,10 +19,11 @@ class Entity
         int x;
         int y;
         int size;
+        int speed;
         ALLEGRO_BITMAP *sprite;
 
     public:
-        Entity(int x, int y, string path, int size);
+        Entity(int x, int y, string path, int size, int speed);
         Entity();
         void setX(int X);
         int getX();
@@ -28,5 +31,8 @@ class Entity
         int getY();
         void print();
         int getSize();
+        void setSize(int);
+        int getSpeed();
+        void setSpeed(int);
 };
 #endif

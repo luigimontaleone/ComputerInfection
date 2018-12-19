@@ -1,5 +1,5 @@
 #include"../Header/Player.h"
-Player::Player(int x_init, int y_init, string path): speed(3), x_init(x_init), y_init(y_init), Entity(x_init, y_init, path, 32)
+Player::Player(int x_init, int y_init, string path): x_init(x_init), y_init(y_init), Entity(x_init, y_init, path, 32, 4)
 {
     lives = 3;
     score = 0;
@@ -51,8 +51,4 @@ void Player::moveRight()
 void Player::moveLeft()
 {
     x -= speed;
-}
-int Player::getSpeed()
-{
-    return speed;
 }

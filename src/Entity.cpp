@@ -1,5 +1,5 @@
 #include "../Header/Entity.h"
-Entity::Entity(int x, int y, string path, int s): x(x), y(y), size(s) 
+Entity::Entity(int x, int y, string path, int s, int speed): x(x), y(y), size(s), speed(speed)
 {
     sprite = al_load_bitmap(path.c_str());
 }
@@ -27,4 +27,12 @@ void Entity::print()
 int Entity::getSize()
 {
     return size;
+}
+void Entity::setSize(int x)
+{
+    size = x;
+}
+int Entity::getSpeed()
+{
+    return speed;
 }
