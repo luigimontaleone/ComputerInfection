@@ -49,3 +49,7 @@ void Enemy::set_dir(int dir)
 {
     this->dir = dir;
 }
+int Enemy::get_dir()
+{
+    return dir;
+}

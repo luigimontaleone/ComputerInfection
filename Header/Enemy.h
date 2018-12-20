@@ -11,5 +11,6 @@ class Enemy : public Entity
         Enemy(int x, int y, string path, bool is_boss, int speed);
         void move();
         void set_dir(int dir);
+        int get_dir();
 };
 #endif
