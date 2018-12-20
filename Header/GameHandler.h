@@ -29,7 +29,7 @@ class GameHandler
         void printBG();
         void scale();
         void load_map();
-        void read_map(bool);
+        void read_map();
         int read_something_from_map(int, int);
         void movePlayer(ALLEGRO_EVENT);
         void moveEnemy(int, bool);
