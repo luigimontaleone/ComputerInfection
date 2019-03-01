@@ -5,8 +5,8 @@ Enemy::Enemy(int x, int y, string path, bool is_boss, int speed): Entity(x, y, p
     if(is_boss)
     {
         size = 64;
-        dir = rand()%8 + 1;
     }
+    dir = rand()%8 + 1;
 }
 void Enemy::move()
 {

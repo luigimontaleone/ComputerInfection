@@ -9,6 +9,7 @@ class Player : public Entity
         int y_init;
         int lives;
         int score;
+        bool eating;
         
     public:
         Player(int x_init, int y_init, string path);
@@ -18,6 +19,8 @@ class Player : public Entity
         int getYinit();
         int getLives();
         int getScore();
+        bool getEating();
+        void setEating(bool);
         void decreaseLives();
         void increaseScore();  
         void moveUp();

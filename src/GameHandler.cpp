@@ -46,7 +46,12 @@ void GameHandler::Game()
             redraw = true;
         else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             break;
-        printBG();
+        al_get_keyboard_state(actually); //Panoramica attuale di ciò che sta succedendo sulla tastiera
+        if(al_key_down(actually, ALLEGRO_KEY_SPACE) &&
+         (al_key_down(actually, ALLEGRO_KEY_UP) || al_key_down(actually, ALLEGRO_KEY_DOWN) || 
+         al_key_down(actually, ALLEGRO_KEY_LEFT) || al_key_down(actually, ALLEGRO_KEY_RIGHT)))
+            player->setEating(true); //Se sono premuti contemporaneamente una delle freccette e la barra
+        printBG(); 
         movePlayer(ev);
         moveEnemy(0, true);
         for(int i = 0; i < enemies.size(); i++)
@@ -115,10 +120,9 @@ void GameHandler::read_map()
                 boss = new Enemy(j * 15 + 200, i * 15 , "../Images/enemy.png", true, 1);
                 create = false;
             }
-            else if (logic_map[i][j] == 4 && cont_enemies < 8)
+            else if (logic_map[i][j] == 4 && enemies.size() < 9)
             {
                 enemies.push_back(new Enemy(j * 15 + 200, i * 15, "../Images/enemy2.png", false, 1));
-                cont_enemies++;
             }
             else if (logic_map[i][j] == 1 && create2)
             {
@@ -127,8 +131,6 @@ void GameHandler::read_map()
             }
         }
     }
-    //cout<<"size enemies: "<<enemies.size()<<endl;
-    //return;
 }
 int GameHandler::read_something_from_map(int i, int j)
 {
@@ -155,6 +157,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 player->moveLeft();
             break;
         case ALLEGRO_KEY_SPACE:
+
             break;
         default:
             break;
@@ -388,6 +391,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
         boss->move();
     else
         enemies[i]->move();
+
 }
 bool GameHandler::collision(int x, int y, bool isPlayer)
 {

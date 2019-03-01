@@ -3,6 +3,7 @@ Player::Player(int x_init, int y_init, string path): x_init(x_init), y_init(y_in
 {
     lives = 3;
     score = 0;
+    eating=false;
 }
 void Player::setXinit(int X)
 {
@@ -27,6 +28,14 @@ int Player::getLives()
 int Player::getScore()
 {
     return score;
+}
+bool Player::getEating()
+{
+    return eating;
+}
+void Player::setEating(bool eat)
+{
+    eating = eat;
 }
 void Player::decreaseLives()
 {

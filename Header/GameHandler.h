@@ -5,6 +5,7 @@ class GameHandler
     private:
         //ALLEGRO_DISPLAY_MODE disp_data;
         ALLEGRO_DISPLAY *display;
+        ALLEGRO_KEYBOARD_STATE *actually;
         Player *player;
         Enemy *boss;
         vector<Enemy*> enemies;
