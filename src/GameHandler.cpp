@@ -123,7 +123,6 @@ void GameHandler::read_map()
 {
     bool create = true;
     bool create2 = create;
-    int cont_enemies = 0;
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
@@ -255,6 +254,14 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     logic_map[i][j] = -2;
                 }
             }
+            for(int i = 0; i < 40; i++)
+            {
+                for(int j = 0; j < 40; j++)
+                {
+                    if(logic_map[i][j]==-1)
+                        logic_map[i][j]=1;
+                }
+            }
 
         }
     }
@@ -263,19 +270,19 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
         switch(ev.keyboard.keycode)
         {
             case ALLEGRO_KEY_UP:
-                if(collision(player->getX(), player->getY() - player->getSpeed(), true))
+                if(collision(player->getX(), player->getY() - (player->getSpeed()*3), true))
                     player->moveUp();
                 break;
             case ALLEGRO_KEY_DOWN:
-                if(collision(player->getX(), player->getY() + player->getSpeed(), true))
+                if(collision(player->getX(), player->getY() + (player->getSpeed()*3), true))
                     player->moveDown();
                 break;
             case ALLEGRO_KEY_RIGHT:
-                if(collision(player->getX() + player->getSpeed(), player->getY(), true))
+                if(collision(player->getX() + (player->getSpeed()*3), player->getY(), true))
                     player->moveRight();
                 break;
             case ALLEGRO_KEY_LEFT:
-                if(collision(player->getX() - player->getSpeed(), player->getY(), true))
+                if(collision(player->getX() - (player->getSpeed()*3), player->getY(), true))
                     player->moveLeft();
                 break;
             default:
@@ -525,7 +532,7 @@ bool GameHandler::collision(int x, int y, bool isPlayer)
     if (isPlayer)
     {
         x = (x - 200) / 15;
-        y = (y / 15);
+        y = y / 15;
         if( x > 39 || y > 39 || x < 0 || y < 0)
             return false;
     } 
