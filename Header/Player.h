@@ -5,22 +5,25 @@
 class Player : public Entity
 {
     private:
-        int x_init;
-        int y_init;
+        vector<int> passiX;
+        vector<int> passiY;
         int lives;
         int score;
-        bool eating;
+        bool cutting;
+
         
     public:
-        Player(int x_init, int y_init, string path);
-        void setXinit(int X);
-        int getXinit();
-        void setYinit(int Y);
-        int getYinit();
+        Player(int x, int y, string path);
+        void aggiungiPassiX(int);
+        void aggiungiPassiY(int);
+        const vector<int>& getPassiX();
+        const vector<int>& getPassiY();
+        void svuotaPassi();
+        int getSizePassi();
         int getLives();
         int getScore();
-        bool getEating();
-        void setEating(bool);
+        bool getCutting();
+        void setCutting(bool);
         void decreaseLives();
         void increaseScore();  
         void moveUp();

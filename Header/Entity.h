@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <time.h>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 class Entity

@@ -1,25 +1,35 @@
 #include"../Header/Player.h"
-Player::Player(int x_init, int y_init, string path): x_init(x_init), y_init(y_init), Entity(x_init, y_init, path, 32, 4)
+Player::Player(int x, int y, string path):Entity(x, y, path, 32, 15)
 {
     lives = 3;
     score = 0;
-    eating=false;
+    cutting = false;
 }
-void Player::setXinit(int X)
+
+void Player::aggiungiPassiX(int x)
 {
-    x_init = X;
+    passiX.push_back(x);
 }
-int Player::getXinit()
+void Player::aggiungiPassiY(int x)
 {
-    return x_init;
+    passiY.push_back(x);
 }
-void Player::setYinit(int Y)
+const vector<int>& Player::getPassiX()
 {
-    y_init = Y;
+    return passiX;
 }
-int Player::getYinit()
+const vector<int>& Player::getPassiY()
 {
-    return y_init;
+    return passiY;
+}
+void Player::svuotaPassi()
+{
+    passiX.clear();
+    passiY.clear();
+}
+int Player::getSizePassi()
+{
+    return passiX.size();
 }
 int Player::getLives()
 {
@@ -29,13 +39,13 @@ int Player::getScore()
 {
     return score;
 }
-bool Player::getEating()
+bool Player::getCutting()
 {
-    return eating;
+    return cutting;
 }
-void Player::setEating(bool eat)
+void Player::setCutting(bool cut)
 {
-    eating = eat;
+    cutting = cut;
 }
 void Player::decreaseLives()
 {

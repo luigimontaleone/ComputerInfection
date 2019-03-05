@@ -22,6 +22,7 @@ int main()
         cout<<"failed install keyboard";
         return -1;
     }
+    
     GameHandler gamehandler;
     gamehandler.Game();
     return 0;

@@ -5,7 +5,7 @@ class GameHandler
     private:
         //ALLEGRO_DISPLAY_MODE disp_data;
         ALLEGRO_DISPLAY *display;
-        ALLEGRO_KEYBOARD_STATE *actually;
+        ALLEGRO_KEYBOARD_STATE currently;
         Player *player;
         Enemy *boss;
         vector<Enemy*> enemies;
@@ -28,6 +28,7 @@ class GameHandler
         GameHandler();
         void Game();
         void printBG();
+        void setCurrentPos(int, int, int);
         void scale();
         void load_map();
         void read_map();

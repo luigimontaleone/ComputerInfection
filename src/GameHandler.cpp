@@ -1,6 +1,6 @@
 #include "../Header/GameHandler.h"
 
-GameHandler::GameHandler(): width(830), height(630), FPS(60)
+GameHandler::GameHandler(): width(800), height(600), FPS(60)
 {
     srand(time(0));
     rows = 40;
@@ -46,13 +46,28 @@ void GameHandler::Game()
             redraw = true;
         else if(ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             break;
-        al_get_keyboard_state(actually); //Panoramica attuale di ciò che sta succedendo sulla tastiera
-        if(al_key_down(actually, ALLEGRO_KEY_SPACE) &&
-         (al_key_down(actually, ALLEGRO_KEY_UP) || al_key_down(actually, ALLEGRO_KEY_DOWN) || 
-         al_key_down(actually, ALLEGRO_KEY_LEFT) || al_key_down(actually, ALLEGRO_KEY_RIGHT)))
-            player->setEating(true); //Se sono premuti contemporaneamente una delle freccette e la barra
+        al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
+        if(al_key_down(&currently, ALLEGRO_KEY_SPACE) &&
+         (al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
+         al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
+            player->setCutting(true); //Se sono premuti contemporaneamente una delle freccette e la barra
+        else
+            player->setCutting(false);
         printBG(); 
+        if(ev.keyboard.keycode == ALLEGRO_KEY_L)
+        {
+            for(int i=0;i<40;i++)
+            {
+                for(int j=0;j<40;j++)
+                {
+                    cout<<logic_map[i][j]<<" ";
+                }
+                cout<<endl;
+            }
+        }
         movePlayer(ev);
+        //cout<<(player->getX()-200)/15<<" "<<player->getY()/15<<endl;
+
         moveEnemy(0, true);
         for(int i = 0; i < enemies.size(); i++)
         {
@@ -65,7 +80,6 @@ void GameHandler::Game()
             al_flip_display();
             al_clear_to_color(al_map_rgb(0,0,0));
         }
-        //cout<<player->getX()<<" "<<player->getY()<<endl;
 
     }
 }
@@ -136,31 +150,137 @@ int GameHandler::read_something_from_map(int i, int j)
 {
     return logic_map[i][j];
 }
+void GameHandler::setCurrentPos(int i, int j, int value)
+{
+    logic_map[i][j] = value;
+}
 void GameHandler::movePlayer(ALLEGRO_EVENT ev)
 {
-    switch(ev.keyboard.keycode)
+    if(player->getCutting())
     {
-        case ALLEGRO_KEY_UP:
-            if(collision(player->getX(), player->getY() - player->getSpeed(), true))
+        bool sostituisci = false;
+        int x2, y2;
+        switch(ev.keyboard.keycode)
+        {
+            case ALLEGRO_KEY_UP:
+                player->aggiungiPassiX((player->getX()-200)/15);
+                player->aggiungiPassiY(player->getY()/15);
+                x2 = (player->getX()  - 200) / 15;
+                y2 = (player->getY() - player->getSpeed()) / 15;
+                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
+                    break;
+                if(read_something_from_map(y2, x2) == 1)
+                {
+                    sostituisci = true;
+                }
+                else
+                {
+                    setCurrentPos(y2, x2, -1);
+                }
                 player->moveUp();
-            break;
-        case ALLEGRO_KEY_DOWN:
-            if(collision(player->getX(), player->getY() + player->getSpeed(), true))
+                break;
+            case ALLEGRO_KEY_DOWN:
+                player->aggiungiPassiX((player->getX()-200)/15);
+                player->aggiungiPassiY(player->getY()/15);
+                x2 = (player->getX()  - 200) / 15;
+                y2 = (player->getY() + player->getSpeed()) / 15;
+                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
+                    break;
+                if(read_something_from_map(y2, x2) == 1)
+                {
+                    sostituisci = true;
+                }
+                else
+                {
+                    setCurrentPos(y2, x2, -1);
+                }
                 player->moveDown();
-            break;
-        case ALLEGRO_KEY_RIGHT:
-            if(collision(player->getX() + player->getSpeed(), player->getY(), true))
-                player->moveRight();
-            break;
-        case ALLEGRO_KEY_LEFT:
-            if(collision(player->getX() - player->getSpeed(), player->getY(), true))
+                break;
+            case ALLEGRO_KEY_LEFT:
+                player->aggiungiPassiX((player->getX()-200)/15);
+                player->aggiungiPassiY(player->getY()/15);
+                x2 = (player->getX() - player->getSpeed() - 200) / 15;
+                y2 = (player->getY() / 15);
+                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
+                    break;
+                if(read_something_from_map(y2, x2) == 1)
+                {
+                    sostituisci = true;
+                }
+                else
+                {
+                    setCurrentPos(y2, x2, -1);
+                }
                 player->moveLeft();
-            break;
-        case ALLEGRO_KEY_SPACE:
+                break;
+            case ALLEGRO_KEY_RIGHT:
+                player->aggiungiPassiX((player->getX()-200)/15);
+                player->aggiungiPassiY(player->getY()/15);
+                x2 = (player->getX() + player->getSpeed()  - 200) / 15;
+                y2 = (player->getY() / 15);
+                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
+                    break;
+                if(read_something_from_map(y2, x2) == 1)
+                {
+                    sostituisci = true;
+                }
+                else
+                {
+                    setCurrentPos(y2, x2, -1);
+                }
+                player->moveRight();
+                break;
+            default:
+                break;
+        }
+        
+        if(sostituisci)
+        {
+            for(int i = 0; i<player->getSizePassi();i++)
+            {
+                for(int j=0;j<player->getSizePassi();j++)
+                    cout<<player->getPassiY()[i]<<" "<<player->getPassiX()[j]<<" ";
+                cout<<endl;
+            }
+            cout<<endl<<endl;
+            auto maxX = max_element(player->getPassiX().begin(),player->getPassiX().end());
+            auto maxY = max_element(player->getPassiY().begin(),player->getPassiY().end());
+            auto minX = min_element(player->getPassiX().begin(),player->getPassiX().end());
+            auto minY = min_element(player->getPassiY().begin(),player->getPassiY().end());
+            cout<<(*minY)<<" "<<(*minX)<<"      "<<(*maxY)<<" "<<(*maxX)<<endl;
+            for(int i = (*minY); i < (*maxY); i++)
+            {
+                for(int j = (*minX); j < (*maxX); j++)
+                {
+                    logic_map[i][j] = -2;
+                }
+            }
 
-            break;
-        default:
-            break;
+        }
+    }
+    else
+    {
+        switch(ev.keyboard.keycode)
+        {
+            case ALLEGRO_KEY_UP:
+                if(collision(player->getX(), player->getY() - player->getSpeed(), true))
+                    player->moveUp();
+                break;
+            case ALLEGRO_KEY_DOWN:
+                if(collision(player->getX(), player->getY() + player->getSpeed(), true))
+                    player->moveDown();
+                break;
+            case ALLEGRO_KEY_RIGHT:
+                if(collision(player->getX() + player->getSpeed(), player->getY(), true))
+                    player->moveRight();
+                break;
+            case ALLEGRO_KEY_LEFT:
+                if(collision(player->getX() - player->getSpeed(), player->getY(), true))
+                    player->moveLeft();
+                break;
+            default:
+                break;
+        }
     }
     player->print();
 }
@@ -395,30 +515,29 @@ void GameHandler::moveEnemy(int i, bool is_boss)
 }
 bool GameHandler::collision(int x, int y, bool isPlayer)
 {
-    if (isPlayer)
+    /*if (isPlayer)
     {
         if (x < 200 || y < 0 || x > width - player->getSize() || y > height - player->getSize())
             return false;
-    }
+    }*/
     int x2 = x;
     int y2 = y;
     if (isPlayer)
     {
         x = (x - 200) / 15;
         y = (y / 15);
-    }
+        if( x > 39 || y > 39 || x < 0 || y < 0)
+            return false;
+    } 
     else
     {
         x = (x - 200 - 32) / 15;
         y = (y - 32) / 15;
     }
-    cout<<"x: "<<x<<" y:"<<y<<endl;
     int something = read_something_from_map(y, x);
     if(something != 1 && isPlayer)
         return false;
-    //if((something != 0 && something != 3 && !isPlayer) && (x <= 200 + boss->getSize() || x >= width - boss->getSize() || y <= 1 + boss->getSize() || y >= height - boss->getSize()))
-     //   return false;
-    cout<<"x: "<<x2<<" y2: "<<y2<<endl;
+    
     x2 = (x2 - 200 + 64) / 15;
     y2 = (y2 + 64) / 15;
 
