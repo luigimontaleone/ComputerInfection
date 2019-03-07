@@ -36,4 +36,5 @@ class GameHandler
         void movePlayer(ALLEGRO_EVENT);
         void moveEnemy(int, bool);
         bool collision(int, int, bool);
+        void min_max(int&, int&, bool);
 };

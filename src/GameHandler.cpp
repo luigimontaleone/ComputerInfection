@@ -235,23 +235,28 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
         
         if(sostituisci)
         {
-            for(int i = 0; i<player->getSizePassi();i++)
+            /*for(int i = 0; i < player->getSizePassi(); i++)
             {
-                for(int j=0;j<player->getSizePassi();j++)
+                for(int j = 0;j < player->getSizePassi(); j++)
                     cout<<player->getPassiY()[i]<<" "<<player->getPassiX()[j]<<" ";
                 cout<<endl;
             }
-            cout<<endl<<endl;
-            auto maxX = max_element(player->getPassiX().begin(),player->getPassiX().end());
+            cout<<endl<<endl;*/
+            auto maxX = max_element(player->getPassiX().begin(),player->getPassiX().end()); 
             auto maxY = max_element(player->getPassiY().begin(),player->getPassiY().end());
             auto minX = min_element(player->getPassiX().begin(),player->getPassiX().end());
             auto minY = min_element(player->getPassiY().begin(),player->getPassiY().end());
             cout<<(*minY)<<" "<<(*minX)<<"      "<<(*maxY)<<" "<<(*maxX)<<endl;
-            for(int i = (*minY); i < (*maxY); i++)
+            
+            for(int i = (*minY); i <= (*maxY); i++)
             {
-                for(int j = (*minX); j < (*maxX); j++)
+                for(int j = (*minX); j <= (*maxX); j++)
                 {
-                    logic_map[i][j] = -2;
+                    if(*minY == 0 && i < *maxY && *minX == 0 && j < *maxX)
+                        logic_map[i][j] = 7;
+                    else if(*minY > 0 && i < *maxY && i > *minY && *minX == 0 && j < *maxX)
+                        logic_map[i][j] = 7;
+                    //else if(*minY > 0 && i < *maxY && i > *minY && *minX == 0 && j < *maxX)
                 }
             }
             for(int i = 0; i < 40; i++)
@@ -556,3 +561,48 @@ bool GameHandler::collision(int x, int y, bool isPlayer)
         return false;
     return true;
 }
+void GameHandler::min_max(int &i, int &j, bool min)
+{
+    vector<int> pY;
+    vector<int> pX;
+    if(min)
+    {
+        for(int i = 0; i < 40; i++)
+        {
+            bool considera = false;
+            for(int j = 0; j < 40; j++)
+            {
+                if(logic_map[i][j] == 1)
+                {
+                    considera = true;
+                    pX.push_back(j);
+                }
+            }
+            if(considera)
+                pY.push_back(i);
+        }
+        i = *min_element(pY.begin(), pY.end());
+        j = *min_element(pX.begin(), pX.end());
+    }
+    else
+    {
+        for(int i = 0; i < 40; i++)
+        {
+            bool considera = false;
+            for(int j = 0; j < 40; j++)
+            {
+                if(logic_map[i][j] == 1)
+                {
+                    considera = true;
+                    pX.push_back(j);
+                }
+            }
+            if(considera)
+                pY.push_back(i);
+        }
+        i = *max_element(pY.begin(), pY.end());
+        j = *max_element(pX.begin(), pX.end());
+    }
+    
+}
+
