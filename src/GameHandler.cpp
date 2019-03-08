@@ -52,7 +52,10 @@ void GameHandler::Game()
          al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
             player->setCutting(true); //Se sono premuti contemporaneamente una delle freccette e la barra
         else
+        {
             player->setCutting(false);
+           // player->svuotaPassi();
+        }
         printBG(); 
         if(ev.keyboard.keycode == ALLEGRO_KEY_L)
         {
@@ -158,75 +161,72 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
     if(player->getCutting())
     {
         bool sostituisci = false;
-        int x2, y2;
-        switch(ev.keyboard.keycode)
-        {
+        int x2 = 0, y2 = 0;
+        switch(ev.keyboard.keycode) //TODO possibile funzione da chiamare in ogni "case" con differenti
+        {                           // parametri
             case ALLEGRO_KEY_UP:
-                player->aggiungiPassiX((player->getX()-200)/15);
-                player->aggiungiPassiY(player->getY()/15);
-                x2 = (player->getX()  - 200) / 15;
-                y2 = (player->getY() - player->getSpeed()) / 15;
+                y2 -= player->getSpeed();
+                sostituisci = playerCutting(x2,y2);
                 if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
                     break;
-                if(read_something_from_map(y2, x2) == 1)
-                {
-                    sostituisci = true;
-                }
-                else
-                {
-                    setCurrentPos(y2, x2, -1);
-                }
                 player->moveUp();
                 break;
             case ALLEGRO_KEY_DOWN:
-                player->aggiungiPassiX((player->getX()-200)/15);
+                y2 += player->getSpeed();
+                sostituisci = playerCutting(x2,y2);
+                /*player->aggiungiPassiX((player->getX()-200)/15);
                 player->aggiungiPassiY(player->getY()/15);
                 x2 = (player->getX()  - 200) / 15;
-                y2 = (player->getY() + player->getSpeed()) / 15;
+                y2 = (player->getY() + player->getSpeed()) / 15;*/
                 if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
                     break;
-                if(read_something_from_map(y2, x2) == 1)
+                /*if(read_something_from_map(y2, x2) == 1)
                 {
                     sostituisci = true;
                 }
                 else
                 {
                     setCurrentPos(y2, x2, -1);
-                }
+                }*/
                 player->moveDown();
                 break;
             case ALLEGRO_KEY_LEFT:
-                player->aggiungiPassiX((player->getX()-200)/15);
+                x2 -= player->getSpeed();
+                sostituisci = playerCutting(x2,y2);
+                /*player->aggiungiPassiX((player->getX()-200)/15);
                 player->aggiungiPassiY(player->getY()/15);
                 x2 = (player->getX() - player->getSpeed() - 200) / 15;
-                y2 = (player->getY() / 15);
+                y2 = (player->getY() / 15);*/
                 if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
                     break;
-                if(read_something_from_map(y2, x2) == 1)
+                /*if(read_something_from_map(y2, x2) == 1)
                 {
                     sostituisci = true;
                 }
                 else
                 {
                     setCurrentPos(y2, x2, -1);
-                }
+                }*/
                 player->moveLeft();
                 break;
             case ALLEGRO_KEY_RIGHT:
+                x2 += player->getSpeed();
+                sostituisci = playerCutting(x2,y2);
+                /*
                 player->aggiungiPassiX((player->getX()-200)/15);
                 player->aggiungiPassiY(player->getY()/15);
                 x2 = (player->getX() + player->getSpeed()  - 200) / 15;
-                y2 = (player->getY() / 15);
+                y2 = (player->getY() / 15);*/
                 if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
                     break;
-                if(read_something_from_map(y2, x2) == 1)
+                /*if(read_something_from_map(y2, x2) == 1)
                 {
                     sostituisci = true;
                 }
                 else
                 {
                     setCurrentPos(y2, x2, -1);
-                }
+                }*/
                 player->moveRight();
                 break;
             default:
@@ -252,11 +252,43 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             {
                 for(int j = (*minX); j <= (*maxX); j++)
                 {
-                    if(*minY == 0 && i < *maxY && *minX == 0 && j < *maxX)
-                        logic_map[i][j] = 7;
-                    else if(*minY > 0 && i < *maxY && i > *minY && *minX == 0 && j < *maxX)
-                        logic_map[i][j] = 7;
-                    //else if(*minY > 0 && i < *maxY && i > *minY && *minX == 0 && j < *maxX)
+                    if(*minX == 0 && *maxX < 39)
+                    {
+                        if(*minY == 0 && *maxY < 39 && i < *maxY && j < *maxX) //6
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY == 39 && i > *minY && j < *maxX) //7
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY < 39 && i > *minY && i < *maxY && j < *maxX) //8
+                            logic_map[i][j] = 7;
+                    }
+                    else if(*minX > 0 && *maxX == 39)
+                    {
+                        if(*minY == 0 && *maxY < 39 && i < *maxY && j > *minX) //10
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY == 39 && i > *minY && j > *minX) //11
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY < 39 && i > *minY && i < *maxY && j > *minX) //12
+                            logic_map[i][j] = 7;
+                    }
+                    else if(*minX > 0 && *maxX < 39)
+                    {
+                        if(*minY == 0 && *maxY < 39 && i < *maxY && j > *minX && j < *maxX) //14
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY == 39 && i > *minY && j > *minX && j < *maxX) //15
+                            logic_map[i][j] = 7;
+                    }
+                    if(*minX == *maxX)
+                    {
+                        if(*minY == 0 && *maxY == 39) //17
+                            logic_map[i][j-1] = 7;
+                    }
+                    if(*minY == *maxY)
+                    {
+                        if(*minX == 0 && *maxX == 39) //18
+                            logic_map[i-1][j] = 7;
+                    }
+
+                    
                 }
             }
             for(int i = 0; i < 40; i++)
@@ -267,7 +299,6 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                         logic_map[i][j]=1;
                 }
             }
-
         }
     }
     else
@@ -295,6 +326,23 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
         }
     }
     player->print();
+}
+bool GameHandler::playerCutting(int &x, int &y)
+{
+    player->aggiungiPassiX((player->getX()-200)/15);
+    player->aggiungiPassiY(player->getY()/15);
+    x = (player->getX()  - 200 + x) / 15;
+    y = (player->getY() + y) / 15;
+    if(read_something_from_map(y, x) == 1) //PROBLEMA entra alla prima iterazione 
+    {
+        return true;
+    }
+    else
+    {
+        setCurrentPos(y, x, -1);
+    }
+    return false;
+      
 }
 void GameHandler::moveEnemy(int i, bool is_boss)
 {

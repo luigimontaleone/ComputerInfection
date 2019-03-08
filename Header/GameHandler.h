@@ -24,6 +24,8 @@ class GameHandler
         int cols;
         const float FPS;
 
+        bool playerCutting(int&, int&);
+
     public:
         GameHandler();
         void Game();
