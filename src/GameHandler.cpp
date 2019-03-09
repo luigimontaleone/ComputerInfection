@@ -76,7 +76,7 @@ void GameHandler::Game()
         {
             moveEnemy(i, false); 
         }
-
+        
         if (redraw && al_is_event_queue_empty(event_queue))
         {
             redraw = false;           
@@ -248,7 +248,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             auto minY = min_element(player->getPassiY().begin(),player->getPassiY().end());
             cout<<(*minY)<<" "<<(*minX)<<"      "<<(*maxY)<<" "<<(*maxX)<<endl;
             
-            for(int i = (*minY); i <= (*maxY); i++)
+            /*for(int i = (*minY); i <= (*maxY); i++)
             {
                 for(int j = (*minX); j <= (*maxX); j++)
                 {
@@ -290,7 +290,51 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
 
                     
                 }
+            }*/
+            for(int i = (*minY); i <= (*maxY); i++)
+            {
+                for(int j = (*minX); j <= (*maxX); j++)
+                {
+                    if(*minX == 0 && *maxX < 39)
+                    {
+                        if(*minY == 0 && *maxY < 39 && i < *maxY && j < *maxX) //6
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY == 39 && i > *minY && j < *maxX) //7
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY < 39 && i > *minY && i < *maxY && j < *maxX) //8
+                            logic_map[i][j] = 7;
+                    }
+                    else if(*minX > 0 && *maxX == 39)
+                    {
+                        if(*minY == 0 && *maxY < 39 && i < *maxY && j > *minX) //10
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY == 39 && i > *minY && j > *minX) //11
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY < 39 && i > *minY && i < *maxY && j > *minX) //12
+                            logic_map[i][j] = 7;
+                    }
+                    else if(*minX > 0 && *maxX < 39)
+                    {
+                        if(*minY == 0 && *maxY < 39 && i < *maxY && j > *minX && j < *maxX) //14
+                            logic_map[i][j] = 7;
+                        else if(*minY > 0 && *maxY == 39 && i > *minY && j > *minX && j < *maxX) //15
+                            logic_map[i][j] = 7;
+                    }
+                    
+                }
             }
+            //17 e 18 funzionano ma non si riesce a provarli senza stoppare i nemici, il gioco si blocca
+            if(*minX == *maxX)                      
+                if(*minY == 0 && *maxY == 39) //17
+                    for(int i = 0; i <= 39; i++)
+                        for(int j = 0; j < *maxX; j++)
+                            logic_map[i][j] = 7;
+            if(*minY == *maxY)
+                if(*minX == 0 && *maxX == 39) //18
+                    for(int i = 0; i < *maxY; i++)
+                        for(int j = 0; j <= 39; j++)
+                            logic_map[i][j] = 7;
+
             for(int i = 0; i < 40; i++)
             {
                 for(int j = 0; j < 40; j++)
