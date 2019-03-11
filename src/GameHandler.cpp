@@ -1,6 +1,6 @@
 #include "../Header/GameHandler.h"
 
-GameHandler::GameHandler(): width(800), height(600), FPS(60)
+GameHandler::GameHandler(): width(816), height(616), FPS(15)
 {
     //srand(time(0));
     rowsMax = 40;
@@ -14,7 +14,7 @@ GameHandler::GameHandler(): width(800), height(600), FPS(60)
         cout<<"failed to create display";
         return;
     }
-    timer = al_create_timer(180.0 / FPS);
+    timer = al_create_timer(1.0 / FPS);
     load_map();
     read_map();
     background_bw = al_load_bitmap("../Images/backgroundBW.png");
@@ -42,7 +42,6 @@ void GameHandler::Game()
     ALLEGRO_EVENT ev, evPrec;
     while(1)
     {
-        evPrec = ev;
         al_wait_for_event(event_queue, &ev);
         if(ev.type == ALLEGRO_EVENT_TIMER)
         {
@@ -51,13 +50,28 @@ void GameHandler::Game()
         if(al_key_down(&currently, ALLEGRO_KEY_SPACE) &&
          (al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
          al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
-            player->setCutting(true); //Se sono prewhy when i press a key on my keyboard it values is for 3muti contemporaneamente una delle freccette e la barra
+            player->setCutting(true); //Se sono prewhy when i press a key on my keyboard  it values is for 3muti contemporaneamente una delle freccette e la barra
         else
         {
             player->setCutting(false);
-           // player->svuotaPassi();
         }
-        //printBG(); 
+        //if(evPrec.keyboard.keycode == ALLEGRO_KEY_LEFT || evPrec.keyboard.keycode == ALLEGRO_KEY_UP || evPrec.keyboard.keycode == ALLEGRO_KEY_RIGHT
+           //|| evPrec.keyboard.keycode == ALLEGRO_KEY_DOWN)
+        movePlayer(evPrec);
+        
+        for(int i = 0; i < enemies.size(); i++)
+        {
+            //moveEnemy(i, false); 
+        }
+        }
+        if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
+        {
+            evPrec = ev;
+        }
+        if(ev.type == ALLEGRO_EVENT_KEY_UP)
+        {
+            evPrec.keyboard.keycode = 80;
+        }
         if(ev.keyboard.keycode == ALLEGRO_KEY_L)
         {
             for(int i=0;i<40;i++)
@@ -69,51 +83,19 @@ void GameHandler::Game()
                 cout<<endl;
             }
         }
-                            cout<<"AAA"<<endl;
-
-        //movePlayer(ev);
-        //cout<<(player->getX()-200)/15<<" "<<player->getY()/15<<endl;
-
-        //moveEnemy(0, true);
-        for(int i = 0; i < enemies.size(); i++)
-        {
-            //moveEnemy(i, false); 
-        }
-        
-
-        //PROVA
-        for(int i = 0; i < 40; i++)
-        {
-            bool comodo = false;
-            for(int j = 0; j < 40; j++)
-            {
-                if(logic_map[i][j] == 1)
-                    comodo = true;
-                if(comodo)
-                {
-                    if(logic_map[i][j] == 7)
-                        logic_map[i][j] = 0;
-                }
-
-            }
-        }
-        
-        }
-        //al_rest(0.01);
         if (redraw && al_is_event_queue_empty(event_queue))
         {
             redraw = false;           
             printBG();
             player->print();
             al_flip_display();
-
             al_clear_to_color(al_map_rgb(0,0,0));
         }
     }
+    
 }
 void GameHandler::printBG()
 {
-    //al_draw_scaled_bitmap(background_bw, 200, 0, 600, 600, scaleX, scaleY, 0, 0, 0);
     al_draw_bitmap(background_bw, 200, 0, 0);
 }
 void GameHandler::scale()
@@ -167,7 +149,7 @@ void GameHandler::read_map()
             }
             else if (logic_map[i][j] == 1 && create2)
             {
-                player = new Player(j * 15 + 200, i * 15, "../Images/pc.png");
+                player = new Player((j * 15 + 200), i * 15, "../Images/pc.png");
                 create2 = false;
             }
         }
@@ -197,7 +179,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 player->moveUp();
                 break;
             case ALLEGRO_KEY_DOWN:
-                y2 += (player->getSpeed() + player->getSize()/2);
+                y2 += (player->getSpeed());
                 sostituisci = playerCutting(x2,y2);
                 if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
                     break;
@@ -211,7 +193,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 player->moveLeft();
                 break;
             case ALLEGRO_KEY_RIGHT:
-                x2 += (player->getSpeed() + player->getSize()/2);
+                x2 += (player->getSpeed());
                 sostituisci = playerCutting(x2,y2);
                 if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
                     break;
@@ -220,10 +202,9 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             default:
                 break;
         }
-        
+        //cout<<y2<<" "<<x2<<endl;
         if(sostituisci)
         {
-            cont++;
             /*for(int i = 0; i < player->getSizePassi(); i++)
             {
                 for(int j = 0;j < player->getSizePassi(); j++)
@@ -236,7 +217,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             auto minX = min_element(player->getPassiX().begin(),player->getPassiX().end());
             auto minY = min_element(player->getPassiY().begin(),player->getPassiY().end());
             //cout<<*minY<<" "<<*maxY<<" "<<*minX<<" "<<*maxX<<endl;
-            /*for(int i = (*minY); i <= (*maxY); i++)
+            for(int i = (*minY); i <= (*maxY); i++)
             {
                 for(int j = (*minX); j <= (*maxX); j++)
                 {
@@ -278,15 +259,15 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
 
                     
                 }
-            }*/
-            cout<<endl;
-            for(int i = (*minY); i <= (*maxY); i++)
+            }
+            //cout<<endl;
+            /*for(int i = (*minY); i <= (*maxY); i++)
             {
                 for(int j = (*minX); j <= (*maxX); j++)
                 {
                     if(logic_map[i][j] != -1)
                     {
-                        logic_map[i][j] = 7;
+                        logic_map[i][j] = 7;*/
                         //cout<<logic_map[i][j]<<" ";
                     /*if(*minX == 0 && *maxX < 39)
                     {
@@ -312,25 +293,23 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                             logic_map[i][j] = 7;
                         else if(*minY > 0 && *maxY == 39 && i > *minY && j > *minX && j < *maxX) //15
                             logic_map[i][j] = 7;
-                    }*/
+                    }
                     }
                     
                 }
-                cout<<endl;
-            }
+                //cout<<endl;
+            }*/
             //17 e 18 funzionano ma non si riesce a provarli senza stoppare i nemici, il gioco si blocca
             /*if(*minX == *maxX)                      
                 if(*minY == 0 && *maxY == 39) //17
                     for(int i = 0; i <= 39; i++)
                         for(int j = 0; j < *maxX; j++)
-                            logic_map[i][j] = 7;
-            if(*minY == *maxY)
+                            logic_map[i][j] = 7;*/
+            /*if(*minY == *maxY)
                 if(*minX == 0 && *maxX == 39) //18
                     for(int i = 0; i < *maxY; i++)
                         for(int j = 0; j <= 39; j++)
                             logic_map[i][j] = 7;*/
-            if(cont == 3)
-            {
                 for(int i = 0; i < 40; i++)
                 {
                     for(int j = 0; j < 40; j++)
@@ -339,50 +318,39 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                             logic_map[i][j] = 1;
                     }
                 }
-                cont = 0;
-                player->svuotaPassi();
-                //updateRows_Cols();
-                //cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl;
-
-            }
-            
-            
-            
         }
     }
-    else
-    {
-        switch(ev.keyboard.keycode)
+        else
         {
-            case ALLEGRO_KEY_UP:
-                if(collision(player->getX(), player->getY() - player->getSpeed(), true))
-                    player->moveUp();
-                break;
-            case ALLEGRO_KEY_DOWN:
-                if(collision(player->getX(), player->getY() + (player->getSpeed() + (player->getSize()/2)), true))
-                    player->moveDown();
-                break;
-            case ALLEGRO_KEY_RIGHT:
-                if(collision(player->getX() + (player->getSpeed() + (player->getSize()/2)), player->getY(), true))
-                    player->moveRight();
-                break;
-            case ALLEGRO_KEY_LEFT:
-                if(collision(player->getX() - (player->getSpeed()), player->getY(), true))
-                    player->moveLeft();
-                break;
-            default:
-                break;
+            switch(ev.keyboard.keycode)
+            {
+                case ALLEGRO_KEY_UP:
+                    if(collision(player->getX(), player->getY() - player->getSpeed(), true))
+                        player->moveUp();
+                    break;
+                case ALLEGRO_KEY_DOWN:
+                    if(collision(player->getX(), player->getY() + player->getSpeed(), true))
+                        player->moveDown();
+                    break;
+                case ALLEGRO_KEY_RIGHT:
+                    if(collision(player->getX() + player->getSpeed(), player->getY(), true))
+                        player->moveRight();
+                    break;
+                case ALLEGRO_KEY_LEFT:
+                    if(collision(player->getX() - player->getSpeed(), player->getY(), true))
+                        player->moveLeft();
+                    break;
+                default:
+                    break;
+            }
         }
-    }
-    player->print();
 }
 bool GameHandler::playerCutting(int &x, int &y)
 {
     player->aggiungiPassiX((player->getX()-200)/15);
     player->aggiungiPassiY(player->getY()/15);
-    x = (player->getX()  - 200 + x) / 15;
+    x = (player->getX() - 200 + x) / 15;
     y = (player->getY() + y) / 15;
-    //cout<<y<<" "<<x<< "(2)"<<endl;
     if(read_something_from_map(y, x) == 1) //PROBLEMA entra alla prima iterazione 
     {
         return true;
@@ -636,7 +604,7 @@ bool GameHandler::collision(int x, int y, bool isPlayer)
     {
         x = (x - 200) / 15;
         y = y / 15;
-        cout<<player->getY()/15<<" "<<player->getX()/15<< "(1)"<<endl;
+        //cout<<x<<" "<<y<< "(1)"<<endl;
         if( x > 39 || y > 39 || x < 0 || y < 0)
             return false;
     } 
@@ -770,7 +738,7 @@ void GameHandler::updateRows_Cols()
                 colonnaNonMassima = false;
 
         }
-        if( !colonnaNonMassima  && colonnaMax)
+        if(!colonnaNonMassima  && colonnaMax)
         {
             colsMax = (i + 2);
             colonnaMax = false;
