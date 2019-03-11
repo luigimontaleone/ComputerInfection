@@ -20,11 +20,15 @@ class GameHandler
         ALLEGRO_TIMER *timer;
         bool redraw;
         int logic_map[40][40];
-        int rows;
-        int cols;
+        int rowsMax;
+        int rowsMin;
+        int colsMax;
+        int colsMin;
+        int cont = 0;
         const float FPS;
 
         bool playerCutting(int&, int&);
+        void updateRows_Cols();
 
     public:
         GameHandler();

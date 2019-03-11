@@ -1,5 +1,5 @@
 #include"../Header/Player.h"
-Player::Player(int x, int y, string path):Entity(x, y, path, 32, 5)
+Player::Player(int x, int y, string path):Entity(x, y, path, 32, 15)
 {
     lives = 3;
     score = 0;
