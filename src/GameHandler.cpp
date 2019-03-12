@@ -205,18 +205,20 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
         //cout<<y2<<" "<<x2<<endl;
         if(sostituisci)
         {
-            /*for(int i = 0; i < player->getSizePassi(); i++)
-            {
-                for(int j = 0;j < player->getSizePassi(); j++)
-                    cout<<player->getPassiY()[i]<<" "<<player->getPassiX()[j]<<" ";
-                cout<<endl;
-            }
-            cout<<endl<<endl;*/
+            cont++;
+            
+                    /*for(int i = 0; i < player->getSizePassi(); i++)
+                    {
+                        for(int j = 0;j < player->getSizePassi(); j++)
+                            cout<<player->getPassiY()[i]<<" "<<player->getPassiX()[j]<<" ";
+                        cout<<endl;
+                    }
+                    cout<<endl<<endl;*/
             auto maxX = max_element(player->getPassiX().begin(),player->getPassiX().end()); 
             auto maxY = max_element(player->getPassiY().begin(),player->getPassiY().end());
             auto minX = min_element(player->getPassiX().begin(),player->getPassiX().end());
             auto minY = min_element(player->getPassiY().begin(),player->getPassiY().end());
-            //cout<<*minY<<" "<<*maxY<<" "<<*minX<<" "<<*maxX<<endl;
+            cout<<*minY<<" "<<*maxY<<" "<<*minX<<" "<<*maxX<<endl;
             for(int i = (*minY); i <= (*maxY); i++)
             {
                 for(int j = (*minX); j <= (*maxX); j++)
@@ -260,6 +262,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     
                 }
             }
+        
             //cout<<endl;
             /*for(int i = (*minY); i <= (*maxY); i++)
             {
@@ -310,6 +313,8 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     for(int i = 0; i < *maxY; i++)
                         for(int j = 0; j <= 39; j++)
                             logic_map[i][j] = 7;*/
+            if(cont >= 1)
+            {
                 for(int i = 0; i < 40; i++)
                 {
                     for(int j = 0; j < 40; j++)
@@ -318,6 +323,9 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                             logic_map[i][j] = 1;
                     }
                 }
+                player->svuotaPassi();
+                cont = 0;
+            }
         }
     }
         else
