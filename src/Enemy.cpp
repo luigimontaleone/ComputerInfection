@@ -43,7 +43,6 @@ void Enemy::move()
         default:
             break;
     }
-    print();
 }
 void Enemy::set_dir(int dir)
 {

@@ -19,6 +19,7 @@ class GameHandler
         ALLEGRO_BITMAP *background;
         ALLEGRO_TIMER *timer;
         bool redraw;
+        bool comodo = true;
         int logic_map[40][40];
         int rowsMax;
         int rowsMin;
