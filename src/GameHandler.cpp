@@ -139,9 +139,9 @@ void GameHandler::read_map()
 {
     bool create = true;
     bool create2 = create;
-    for (int i = 0; i < rowsMax; i++)
+    for (int i = rowsMin; i < rowsMax; i++)
     {
-        for (int j = 0; j < colsMax; j++)
+        for (int j = colsMin; j < colsMax; j++)
         {
 
             if (logic_map[i][j] == 3 && create)
@@ -215,8 +215,8 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 y2 -= (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                cout<<logic_map[y2][x2]<<endl;
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0 || logic_map[y2][x2] == 7)
+                //cout<<logic_map[y2][x2]<<endl;
+                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
                     break;
                 if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
                 {
@@ -229,6 +229,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
+                    isDirectionLeftRight();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -240,8 +241,8 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 y2 += (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                cout<<logic_map[y2][x2]<<endl;
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0 || logic_map[y2][x2] == 7)
+                //cout<<logic_map[y2][x2]<<endl;
+                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
                     break;
                 if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
                 {
@@ -254,6 +255,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
+                    isDirectionLeftRight();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -266,8 +268,8 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 -= (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                cout<<logic_map[y2][x2]<<endl;
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0 || logic_map[y2][x2] == 7)
+                //cout<<logic_map[y2][x2]<<endl;
+                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
                     break;
                 if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
                 {
@@ -280,6 +282,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
+                    isDirectionLeftRight();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -291,8 +294,8 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 += (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                cout<<logic_map[y2][x2]<<endl;
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0 || logic_map[y2][x2] == 7)
+                //cout<<logic_map[y2][x2]<<endl;
+                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
                     break;
                 if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
                 {
@@ -305,6 +308,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
+                    isDirectionLeftRight();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -452,21 +456,22 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             if(*minX == *maxX)                      
             {
                 //if(*minY == 0 && *maxY == 39) //17
-                    for(int i = 0; i <= *maxY; i++)
-                        for(int j = 0; j < *maxX; j++)
+                    for(int i = rowsMin; i <= *maxY; i++)
+                        for(int j = colsMin; j < *maxX; j++)
                             logic_map[i][j] = 7;
             }
             if(*minY == *maxY)
                 //if(*minX == 0 && *maxX == 39) //18
-                    for(int i = 0; i < *maxY; i++)
-                        for(int j = 0; j <= 39; j++)
+                    for(int i = rowsMin; i < *maxY; i++)
+                        for(int j = colsMin; j < colsMax; j++)
                             logic_map[i][j] = 7;
+            
             if(sostituisci)
             {
                 
-                for(int i = 0; i < 40; i++)
+                for(int i = rowsMin; i < rowsMax; i++)
                 {
-                    for(int j = 0; j < 40; j++)
+                    for(int j = colsMin; j < colsMax; j++)
                     {
                         if(logic_map[i][j] == -1)
                             logic_map[i][j] = 1;
@@ -475,10 +480,10 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 player->svuotaPassi();
                 cont = 0;
                 comodo = true;
-                cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl;
-                updateRows_Cols();
-                cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl<<endl;
-
+                //cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl;
+               	updateRows_Cols();
+                //cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl<<endl;
+                clearMap();
             }
         }
         for(int i = 0; i < player->getSizePassi(); i++)
@@ -847,10 +852,6 @@ void GameHandler::min_max(int &i, int &j, bool min)
 
 void GameHandler::updateRows_Cols()
 {
-    int copiaRowsMax = rowsMax;
-    int copiaRowsMin = rowsMin;
-    int copiaColsMax = colsMax;
-    int copiaColsMin = colsMin;
 
     bool rigaMin = true;
     bool rigaMax = true;
@@ -863,11 +864,10 @@ void GameHandler::updateRows_Cols()
         {
             if(logic_map[i][j] == 0)
                 rigaNonMinima = false;
-
         }
         if( !rigaNonMinima  && rigaMin)
         {
-            rowsMin = (i - 1);
+            rowsMin = i - 1;
             rigaMin = false;
         }
     }
@@ -876,17 +876,16 @@ void GameHandler::updateRows_Cols()
         bool colonnaNonMinima = true;
         for(int j = rowsMin; j < rowsMax; j++)
         {
-            if(logic_map[i][j] == 0)
+            if(logic_map[j][i] == 0)
                 colonnaNonMinima = false;
-
         }
         if( !colonnaNonMinima  && colonnaMin)
         {
-            colsMin = (i - 1);
+            colsMin = i - 1;
             colonnaMin = false;
         }
     }
-    for(int i = (rowsMax-1); i >= rowsMin; i--)
+    /*for(int i = (rowsMax-1); i >= rowsMin; i--)
     {
         bool rigaNonMassima = true;
         for(int j = colsMin; j < colsMax; j++)
@@ -915,6 +914,58 @@ void GameHandler::updateRows_Cols()
             colsMax = (i + 2);
             colonnaMax = false;
         }
-    }
+    }*/
 }
+void GameHandler::isDirectionLeftRight()
+{
+    player->setLeft( (player->getX() < (width/2)) );    
+}
+void GameHandler::clearMap()
+{
+    /*if(player->getLeft())
+    {
+        for(int i = rowsMin; i < rowsMax; i++)
+        {
+            bool clear = false;
+            for(int j = colsMin; j < colsMax-1; j++)
+            {
+                if(logic_map[i][j] == 1)
+                {
+                    clear = true;
+                }
+                if(logic_map[i][j] == 0)
+                {
+                    break;
+                }
+                if(logic_map[i][j] == 7 && clear)
+                {
+                    logic_map[i][j] = 0;
+                }
 
+            }
+        }
+    }
+    else
+    {
+        for(int i = rowsMin; i < rowsMax; i++)
+        {
+            bool clear = false;
+            for(int j = colsMax - 1; j >= colsMin; j--)
+            {
+                if(logic_map[i][j] == 1)
+                {
+                    clear = true;
+                }
+                if(logic_map[i][j] == 0)
+                {
+                    break;
+                }
+                if(logic_map[i][j] == 7 && clear)
+                {
+                    logic_map[i][j] = 0;
+                }
+
+            }
+        }
+    }*/
+}

@@ -10,6 +10,7 @@ class Player : public Entity
         int lives;
         int score;
         bool cutting;
+        bool left;
 
         
     public:
@@ -30,5 +31,7 @@ class Player : public Entity
         void moveDown();
         void moveRight();
         void moveLeft();
+        bool getLeft();
+        void setLeft(bool);
 };
 #endif
