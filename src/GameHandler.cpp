@@ -229,7 +229,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    isDirectionLeftRight();
+                    directionPlayer();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -255,7 +255,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    isDirectionLeftRight();
+                    directionPlayer();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -282,7 +282,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    isDirectionLeftRight();
+                    directionPlayer();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -308,7 +308,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    isDirectionLeftRight();
+                    directionPlayer();
                     setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -445,29 +445,41 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     if(logic_map[i][j] != -1 )
                     {
                         
-                        logic_map[i][j] = 7;
+                        //logic_map[i][j] = 7;
                         
                     }
+                    
                 }
                 //cout<<endl;
             }
             //player->svuotaPassi();   
             //17 e 18 funzionano ma non si riesce a provarli senza stoppare i nemici, il gioco si blocca
-            if(*minX == *maxX)                      
+            /*if(*minX == *maxX)                      
             {
                 //if(*minY == 0 && *maxY == 39) //17
                     for(int i = rowsMin; i <= *maxY; i++)
                         for(int j = colsMin; j < *maxX; j++)
-                            logic_map[i][j] = 7;
+                            //logic_map[i][j] = 7;
             }
             if(*minY == *maxY)
                 //if(*minX == 0 && *maxX == 39) //18
                     for(int i = rowsMin; i < *maxY; i++)
                         for(int j = colsMin; j < colsMax; j++)
-                            logic_map[i][j] = 7;
-            
+                            //logic_map[i][j] = 7;*/
+            int medioY = ((*minY)+(*maxY))/2;
+            int medioX = ((*minX)+(*maxX))/2;
+            floodFill(medioY,medioX,7,-1);
+            /*switch(player->getPos())
+            {
+                case 0:floodFill((*minY)+1,(*minX),7,-1); break;
+                case 1:floodFill((*minY),(*minX)+1,7,-1); break;
+                case 2:floodFill((*minY)+1,(*maxX),7,-1); break;
+                case 3:floodFill((*maxY),(*minX)+1,7,-1); break;
+            }*/
+        
             if(sostituisci)
             {
+
                 
                 for(int i = rowsMin; i < rowsMax; i++)
                 {
@@ -483,7 +495,8 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 //cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl;
                	updateRows_Cols();
                 //cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl<<endl;
-                clearMap();
+                //clearMap();
+
             }
         }
         for(int i = 0; i < player->getSizePassi(); i++)
@@ -916,9 +929,16 @@ void GameHandler::updateRows_Cols()
         }
     }*/
 }
-void GameHandler::isDirectionLeftRight()
+void GameHandler::directionPlayer()
 {
-    player->setLeft( (player->getX() < (width/2)) );    
+    if((player->getY() > rowsMin && player->getY() < rowsMax-1) && player->getX() < (height/2))
+        player->setPos(0); //sinistra
+    else if((player->getY() > rowsMin && player->getY() < rowsMax-1) && player->getX() >= (height/2))
+        player->setPos(2); //destra
+    else if((player->getX() > colsMin && player->getX() < colsMax-1) && player->getY() < (height/2))
+        player->setPos(1); //sopra
+    else if((player->getX() > colsMin && player->getX() < colsMax-1) && player->getY() >= (height/2))
+        player->setPos(3);  //sotto
 }
 void GameHandler::clearMap()
 {
@@ -968,4 +988,19 @@ void GameHandler::clearMap()
             }
         }
     }*/
+}
+void GameHandler:: floodFill(int x,int y,int fill_color,int boundary_color)
+{
+    if(logic_map[x][y] != fill_color && logic_map[x][y] != boundary_color)
+    {
+        logic_map[x][y] = fill_color;
+        if(x + 1 < rowsMax)
+            floodFill(x+1,y,fill_color,boundary_color);
+        if(y + 1 < colsMax)
+            floodFill(x,y+1,fill_color,boundary_color);
+        if(x - 1 >= rowsMin)
+            floodFill(x-1,y,fill_color,boundary_color);
+        if(y - 1 >= colsMin)
+            floodFill(x,y-1,fill_color,boundary_color);
+    }
 }

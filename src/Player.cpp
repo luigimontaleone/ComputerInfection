@@ -71,11 +71,11 @@ void Player::moveLeft()
 {
     x -= speed;
 }
-void Player::setLeft(bool l)
+void Player::setPos(int l)
 {
-    left = l;
+    pos = l;
 }
-bool Player::getLeft()
+int Player::getPos()
 {
-    return left;
+    return pos;
 }

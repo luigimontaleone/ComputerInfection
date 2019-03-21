@@ -30,7 +30,7 @@ class GameHandler
 
         bool playerCutting(int&, int&);
         void updateRows_Cols();
-        void isDirectionLeftRight();
+        void directionPlayer();
 
     public:
         GameHandler();
@@ -46,4 +46,5 @@ class GameHandler
         bool collision(int, int, bool);
         void min_max(int&, int&, bool);
         void clearMap();
+        void floodFill(int,int,int,int);
 };
