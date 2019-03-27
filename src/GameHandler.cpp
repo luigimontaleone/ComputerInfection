@@ -83,6 +83,7 @@ void GameHandler::Game()
                 }
                 cout<<endl;
             }
+            cout<<endl;
         }
         if (redraw && al_is_event_queue_empty(event_queue))
         {
@@ -466,9 +467,169 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     for(int i = rowsMin; i < *maxY; i++)
                         for(int j = colsMin; j < colsMax; j++)
                             //logic_map[i][j] = 7;*/
-            int medioY = ((*minY)+(*maxY))/2;
-            int medioX = ((*minX)+(*maxX))/2;
-            floodFill(medioY,medioX,7,-1);
+            bool trovato = false;
+            int medioY = 0;
+            int medioX = 0;
+            int bossX = (boss->getX() - 200) / 15;
+            int bossY = boss->getY() / 15;
+            bool bossInside = false;
+            /*if(bossX >= *minX && bossX <= *maxX && bossY >= *minY && bossY <= *maxY)
+                bossInside = true;
+            cout<<bossInside<<endl;
+
+            for(int i = rowsMin; i < rowsMax; i++)
+            {
+                for(int j = colsMin; j < colsMax; j++)
+                {
+                                            cout<<i<<" "<<j<<endl;
+                                                                    cout<<*minY<<" "<<*maxY<<" "<<*minX<<" "<<*maxX<<endl;
+
+
+                    if(!bossInside && ( j > *minX && j < *maxX && i > *minY && i < *maxY))
+                    {
+
+                        trovato = true;
+                        medioY = i;
+                        medioX = j;
+                        break;
+                    }
+                    else if(bossInside && ( j < *minX && j > *maxX && i < *minY && i > *maxY))
+                    {
+                        trovato = true;
+                        medioY = i;
+                        medioX = j;
+                        break;
+                    }
+                }
+                if(trovato)
+                    break;
+            }*/
+            /*for(int i = 0, j = 0; i < player->getPassiX().size(); i++, j++)
+            {
+                int p = player->getPassiY()[i];
+                int k = player->getPassiX()[j];
+                //cout<<logic_map[p][k]<<" ";
+                if(p != 39 && p != 0 && k != 0 && k != 39)
+                {
+                    //cout<<p<<" "<<k<<endl;
+                    if(logic_map[p][k+1] == -1 && logic_map[p+1][k] == 0)
+                    {
+                        medioY = p+1;
+                        medioX = k;
+                        break;
+                    }
+                    else
+                    {
+                        //cout<<"nt ";
+                    }
+                    
+                }
+            }*/
+            /*for(int i = rowsMin; i < rowsMax; i++)
+            {
+                bool trovato = false;
+                for(int j = colsMin; j < colsMax; j++)
+                {
+                    for(int k = 0; k < )
+                    if(isPointInPath(player->getPassiY(), player->getPassiX(), i , j))
+                    {
+                        medioY = i;
+                        medioX = j;
+                        trovato = true;
+                        break;
+                    }
+                    
+                }
+                if(trovato)
+                    break;
+            }*/
+            vector< pair<int,int> > vertex;
+            bool cambioRiga = false;
+            bool cambioColonna = false;
+            pair<int, int> vertexInFin;
+            vertexInFin.first = player->getPassiY()[0];
+            vertexInFin.second = player->getPassiX()[0];
+            vertex.push_back(vertexInFin);
+            vertexInFin.first = player->getPassiY()[player->getPassiY().size() -1];
+            vertexInFin.second = player->getPassiX()[player->getPassiX().size() -1];
+            vertex.push_back(vertexInFin);
+            for(int i = 0; i < player->getPassiY().size()-1; i++)
+            {
+                vertexInFin.first = player->getPassiY()[i];
+                vertexInFin.second = player->getPassiX()[i];
+                if(vertexInFin.first != player->getPassiY()[i+1])
+                    cambioRiga = true;
+                if(vertexInFin.second != player->getPassiX()[i+1])
+                    cambioColonna = true;
+                if(cambioRiga && cambioColonna)
+                {
+                    cambioRiga = false;
+                    cambioColonna = false;
+                    vertex.push_back(vertexInFin);
+                }
+
+            }
+            bossInside = isPointInPath(vertex, bossX, bossY); // OK
+            cout<<bossInside<<endl;
+            if(bossInside && isPointInPath(vertex, *minY + 1, (*minX + *maxX) / 2) == false) //NON OK GLI IF
+            {
+                medioY = *minY + 1;
+                medioX = (*minX + *maxX) / 2; 
+            }
+            else if(!bossInside && isPointInPath(vertex, *minY + 1, (*minX + *maxX) / 2))
+            {
+                medioY = *minY + 1;
+                medioX = (*minX + *maxX) / 2; 
+            }
+            else if(bossInside && isPointInPath(vertex, *minY + 1, ((*minX + *maxX) / 2) + 1) == false)
+            {
+                medioY = *minY + 1;
+                medioX = ((*minX + *maxX) / 2) + 1; 
+            }
+            else if(!bossInside && isPointInPath(vertex, *minY + 1, ((*minX + *maxX) / 2) + 1))
+            {
+                medioY = *minY + 1;
+                medioX = ((*minX + *maxX) / 2) + 1; 
+            }
+            else if(bossInside && isPointInPath(vertex, *minY + 1, ((*minX + *maxX) / 2) - 1) == false)
+            {
+                medioY = *minY + 1;
+                medioX = ((*minX + *maxX) / 2) - 1; 
+            }
+            else if(!bossInside && isPointInPath(vertex, *minY + 1, ((*minX + *maxX) / 2) - 1))
+            {
+                medioY = *minY + 1;
+                medioX = ((*minX + *maxX) / 2) - 1; 
+            }
+            /*else if(isPointInPath(vertex, *minY - 1, ((*minX + *maxX) / 2) - 1))
+            {
+                medioY = *minY + 1;
+                medioX = ((*minX + *maxX) / 2) - 1; 
+            }
+            else if(isPointInPath(vertex, *minY - 1, ((*minX + *maxX) / 2) + 1))
+            {
+                medioY = *minY - 1;
+                medioX = ((*minX + *maxX) / 2) + 1; 
+            }
+            else if(isPointInPath(vertex, *minY - 1, ((*minX + *maxX) / 2)))
+            {
+                medioY = *minY - 1;
+                medioX = ((*minX + *maxX) / 2); 
+            }
+            else if(isPointInPath(vertex, *minY + 1, ((*minX + *maxX) / 2)))
+            {
+                medioY = *minY + 1;
+                medioX = ((*minX + *maxX) / 2); 
+            }*/
+            //isPointInPath(player->getPassiY(), player->getPassiX(), *minY + 1, (*minX + *maxX) / 2, medioY, medioX);
+            //medioY = (player->getPassiY()[0] + player->getPassiY()[player->getPassiY().size()-1]) / 2;
+            //medioX = (player->getPassiX()[0] + player->getPassiX()[player->getPassiX().size()-1]) / 2;
+            
+            //for(int i = 0; i < vertex.size(); i++)
+            //    cout<<vertex[i].first<<" "<<vertex[i].second<<endl;
+            //cout<<endl;
+            cout<<medioY<<" "<<medioX<<endl;
+            floodFill(medioY, medioX, 7, -1);
             /*switch(player->getPos())
             {
                 case 0:floodFill((*minY)+1,(*minX),7,-1); break;
@@ -1003,4 +1164,55 @@ void GameHandler:: floodFill(int x,int y,int fill_color,int boundary_color)
         if(y - 1 >= colsMin)
             floodFill(x,y-1,fill_color,boundary_color);
     }
+}
+bool GameHandler::isPointInPath(vector< pair<int,int> > vertex, int x, int y)
+{
+    int i = 0, j = vertex.size() - 1;
+    bool trovatoLeft = false;
+    bool trovatoRight = false;
+    for(i; i < vertex.size(); i++)
+    {
+        if(((vertex[i].second > x) != (vertex[j].second > x)) && (y < vertex[i].first + (vertex[j].first - vertex[i].first)
+         * (x - vertex[i].second) / (vertex[j].second - vertex[i].second))) //IL BOSS LO TROVA
+        {
+            return true;
+            //break;        
+        }
+        /*if(((vertex[i].second <= x) && ( x < vertex[j].second)) || ((vertex[j].second <= x) && ( x < vertex[i].second)))
+        {
+            if(y < (vertex[j].first - vertex[i].first) * (x - vertex[i].second) / (vertex[j].second - vertex[i].second) + vertex[i].first)
+            {
+                trovatoRight = true;
+                if(trovatoLeft)
+                    return true;
+            }
+            else
+            {
+                trovatoLeft = true;
+                if(trovatoRight)
+                    return true;
+            }
+            
+        }*/
+        /*if(((vertex[i].first <= y) && ( y < vertex[j].first)) || ((vertex[j].first <= y) && ( y < vertex[i].first)))
+        {
+            if(x < (vertex[j].second - vertex[i].second) * (y - vertex[i].first) / (vertex[j].first - vertex[i].first) + vertex[i].second)
+            {
+                trovatoRight = true;
+                if(trovatoLeft)
+                    return true;
+            }
+            else
+            {
+                trovatoLeft = true;
+                if(trovatoRight)
+                    return true;
+            }
+            
+        }*/
+        
+        j = i;
+    }
+    //return trovatoLeft && trovatoRight;
+    return false;
 }

@@ -46,5 +46,6 @@ class GameHandler
         bool collision(int, int, bool);
         void min_max(int&, int&, bool);
         void clearMap();
+        bool isPointInPath(vector< pair<int,int> >, int, int);
         void floodFill(int,int,int,int);
 };
