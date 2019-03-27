@@ -550,9 +550,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             vertexInFin.first = player->getPassiY()[0];
             vertexInFin.second = player->getPassiX()[0];
             vertex.push_back(vertexInFin);
-            vertexInFin.first = player->getPassiY()[player->getPassiY().size() -1];
-            vertexInFin.second = player->getPassiX()[player->getPassiX().size() -1];
-            vertex.push_back(vertexInFin);
+            
             for(int i = 0; i < player->getPassiY().size()-1; i++)
             {
                 vertexInFin.first = player->getPassiY()[i];
@@ -569,10 +567,46 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
 
             }
+            vertexInFin.first = player->getPassiY()[player->getPassiY().size() -1];
+            vertexInFin.second = player->getPassiX()[player->getPassiX().size() -1];
+            vertex.push_back(vertexInFin);
+
             bossInside = isPointInPath(vertex, bossX, bossY); // OK
             cout<<bossInside<<endl;
-            if(bossInside && isPointInPath(vertex, *minY + 1, (*minX + *maxX) / 2) == false) //NON OK GLI IF
+            /*for(int i = rowsMin; i < rowsMax; i++)
             {
+                bool found = false;
+                for(int j = colsMin; j < colsMax; j++)
+                {
+                    bool uguale = false;
+                    for(int p = 0; p < player->getPassiY().size(); p++)
+                    {
+                        if(player->getPassiY()[p] == i && player->getPassiX()[p] == j)
+                        {
+                            cout<<"ciao"<<endl;
+                            uguale = true;
+                            break;
+                        }
+                    }
+                    if(!uguale)
+                    {
+                        bool x = isPointInPath(vertex, j, i);
+                        if((x && !bossInside) || (!x && bossInside))
+                        {
+                            //cout<<i<<" "<<j<<endl;
+                            medioX = j;
+                            medioY = i;
+                            found = true;
+                            //break;
+                        }
+                    }
+                }
+                if(found)
+                    break;
+            }*/
+            /*if(bossInside && isPointInPath(vertex, *minY + 1, (*minX + *maxX) / 2) == false) //NON OK GLI IF
+            {
+
                 medioY = *minY + 1;
                 medioX = (*minX + *maxX) / 2; 
             }
