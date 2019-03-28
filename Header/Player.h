@@ -10,7 +10,8 @@ class Player : public Entity
         int lives;
         int score;
         bool cutting;
-        int pos;
+        int posUpDown;
+        int posLeftRight;
 
         
     public:
@@ -31,7 +32,9 @@ class Player : public Entity
         void moveDown();
         void moveRight();
         void moveLeft();
-        int getPos();
-        void setPos(int);
+        int getPosUpDown();
+        void setPosUpDown(int);
+        int getPosLeftRight();
+        void setPosLeftRight(int);
 };
 #endif

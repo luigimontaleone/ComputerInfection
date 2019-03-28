@@ -71,11 +71,19 @@ void Player::moveLeft()
 {
     x -= speed;
 }
-void Player::setPos(int l)
+void Player::setPosUpDown(int l)
 {
-    pos = l;
+    posUpDown = l;
 }
-int Player::getPos()
+int Player::getPosUpDown()
 {
-    return pos;
+    return posUpDown;
+}
+void Player::setPosLeftRight(int l)
+{
+    posLeftRight = l;
+}
+int Player::getPosLeftRight()
+{
+    return posLeftRight;
 }

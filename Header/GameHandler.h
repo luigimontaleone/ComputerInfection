@@ -50,4 +50,5 @@ class GameHandler
         void clearMap();
         bool isPointInPath(vector< pair<int,int> >, int, int);
         void floodFill(int,int,int,int);
+        void floodFillControllo(int,int,int,int,bool&);
 };

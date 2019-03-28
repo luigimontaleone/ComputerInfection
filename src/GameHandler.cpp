@@ -91,11 +91,11 @@ void GameHandler::Game()
             redraw = false;           
             printBG();
             printBoard();
-            /*boss->print();
+            boss->print();
             for(int i = 0; i < enemies.size(); i++)
             {
                 enemies[i]->print();
-            }*/
+            }
             player->print();
             al_flip_display();
             al_clear_to_color(al_map_rgb(0,0,0));
@@ -160,12 +160,12 @@ void GameHandler::read_map()
 
             if (logic_map[i][j] == 3 && create)
             {
-                boss = new Enemy(j * 15 + 200, i * 15 , "../Images/enemy.png", true, 1);
+                boss = new Enemy(j * 15 + 200, i * 15 , "../Images/enemy.png", true, 3);
                 create = false;
             }
             else if (logic_map[i][j] == 4 && enemies.size() < 9)
             {
-                enemies.push_back(new Enemy(j * 15 + 200, i * 15, "../Images/enemy2.png", false, 1));
+                enemies.push_back(new Enemy(j * 15 + 200, i * 15, "../Images/enemy2.png", false, 3));
             }
             else if (logic_map[i][j] == 1 && create2)
             {
@@ -332,8 +332,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 break;
             default:
                 break;
-        }
-        
+        }     
         
         //cout<<y2<<" "<<x2<<endl;
         if(sostituisci)
@@ -456,12 +455,12 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     }*/
                     
                     //mancano le combinazioni con Y e l'ultima di X
-                    if(logic_map[i][j] != -1 )
-                    {
+                    //if(logic_map[i][j] != -1 )
+                    //{
                         
                         //logic_map[i][j] = 7;
                         
-                    }
+                    //}
                     
                 }
                 //cout<<endl;
@@ -564,7 +563,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             vertexInFin.second = player->getPassiX()[0];
             vertex.push_back(vertexInFin);
             
-            for(int i = 0; i < player->getPassiY().size()-1; i++)
+            for(int i = 0; i < player->getPassiY().size() - 1; i++) //vertici
             {
                 vertexInFin.first = player->getPassiY()[i];
                 vertexInFin.second = player->getPassiX()[i];
@@ -584,39 +583,176 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             vertexInFin.second = player->getPassiX()[player->getPassiX().size() -1];
             vertex.push_back(vertexInFin);
 
-            bossInside = isPointInPath(vertex, bossX, bossY); // OK
-            cout<<bossInside<<endl;
-            for(int i = rowsMin; i < rowsMax; i++)
+            /*pair<int, int> tmp;
+            tmp.first = *minY;
+            tmp.second = *minX;
+            if(find(vertex.begin(), vertex.end(), tmp) == vertex.end())
             {
-                bool found = false;
-                for(int j = colsMin; j < colsMax; j++)
+                vertexInFin.first = *minY;
+                vertexInFin.second = *minX;
+                vertex.push_back(vertexInFin);
+            } //primo
+
+            tmp.first = *minY;
+            tmp.second = *maxX;
+            if(find(vertex.begin(), vertex.end(), tmp) == vertex.end())
+            {
+                vertexInFin.first = *minY;
+                vertexInFin.second = *maxX;
+                vertex.push_back(vertexInFin);
+            } //secondo
+
+            tmp.first = *maxY;
+            tmp.second = *minX;
+            if(find(vertex.begin(), vertex.end(), tmp) == vertex.end())
+            {
+                vertexInFin.first = *maxY;
+                vertexInFin.second = *minX;
+                vertex.push_back(vertexInFin);
+            } //terzo 
+
+            tmp.first = *maxY;
+            tmp.second = *maxX;
+            if(find(vertex.begin(), vertex.end(), tmp) == vertex.end())
+            {
+                vertexInFin.first = *maxY;
+                vertexInFin.second = *maxX;
+                vertex.push_back(vertexInFin);
+            } //quarto
+            */
+            bossInside = isPointInPath(vertex, bossX, bossY); // OK
+            int bossUpDown = -1;
+            int bossLeftRight = -1;
+            if((boss->getX()-200)/15 < ((colsMax + colsMin)/2))
+                bossLeftRight = 0; //sinistra
+            else if((boss->getX()-200)/15 >= ((colsMax + colsMin)/2))
+                bossLeftRight = 1; //destra
+            if(boss->getY()/15 < ((rowsMax + rowsMin)/2))
+                bossUpDown = 0; //sopra
+            else if(boss->getY()/15 >= ((rowsMax + rowsMin)/2))
+                bossUpDown = 1;
+            cout<<bossInside<<endl;
+            if(*minY == *maxY)
+            {
+                if(bossUpDown == 0 && player->getPosUpDown() == 0)
                 {
-                    bool uguale = false;
-                    for(int p = 0; p < player->getPassiY().size(); p++)
+                    if(player->getY() < boss->getY())
                     {
-                        if(player->getPassiY()[p] == i && player->getPassiX()[p] == j)
-                        {
-                            cout<<"ciao"<<endl;
-                            uguale = true;
-                            break;
-                        }
+                        medioY = *minY - 1;
+                        medioX = *minX + 1;
                     }
-                    if(!uguale)
+                    else
                     {
-                        bool x = isPointInPath(vertex, j, i);
-                        if((x && !bossInside) || (!x && bossInside))
-                        {
-                            //cout<<i<<" "<<j<<endl;
-                            medioX = j;
-                            medioY = i;
-                            found = true;
-                            //break;
-                        }
+                        medioY = *maxY + 1;
+                        medioX = *minX + 1;
                     }
-                    
                 }
-                if(found)
-                    break;
+                else if(bossUpDown == 0 && player->getPosUpDown() == 1)
+                {
+                    medioY = *minY + 1;
+                    medioX = *minX + 1;
+                }
+                else if(bossUpDown == 1 && player->getPosUpDown() == 0)
+                {
+                    medioY = *minY - 1;
+                    medioX = *minX + 1;
+                }
+                else
+                {
+                    if(player->getY() < boss->getY())
+                    {
+                        medioY = *minY - 1;
+                        medioX = *minX + 1;
+                    }
+                    else
+                    {
+                        medioY = *maxY + 1;
+                        medioX = *minX + 1;
+                    }
+                }
+            }
+            else if(*minX == *maxX)
+            {
+                if(bossLeftRight == 0 && player->getPosLeftRight() == 0)
+                {
+                    if(player->getX() < boss->getX())
+                    {
+                        medioY = *minY + 1;
+                        medioX = *minX - 1;
+                    }
+                    else
+                    {
+                        medioY = *maxY + 1;
+                        medioX = *minX + 1;
+                    }
+                }
+                else if(bossLeftRight == 0 && player->getPosLeftRight() == 1)
+                {
+                    medioY = *minY + 1;
+                    medioX = *minX + 1;
+                }
+                else if(bossLeftRight == 1 && player->getPosLeftRight() == 0)
+                {
+                    medioY = *minY + 1;
+                    medioX = *minX - 1;
+                }
+                else
+                {
+                    if(player->getX() < boss->getX())
+                    {
+                        medioY = *minY + 1;
+                        medioX = *minX - 1;
+                    }
+                    else
+                    {
+                        medioY = *maxY + 1;
+                        medioX = *minX + 1;
+                    }
+                }
+                
+            }
+            else
+            {
+                for(int i = rowsMin; i < rowsMax; i++)
+                {
+                    bool found = false;
+                    for(int j = colsMin; j < colsMax; j++)
+                    {
+                        bool uguale = false;
+                        for(int p = 0; p < player->getPassiY().size(); p++)
+                        {
+                            if(player->getPassiY()[p] == i && player->getPassiX()[p] == j)
+                            {
+                                //cout<<"ciao"<<endl;
+                                uguale = true;
+                                break;
+                            }
+                        }
+                        if(!uguale && logic_map[i][j] != 7 && logic_map[i][j] != 1)
+                        {
+                            bool ctrl = true;
+                            //floodFillControllo(i, j, -2, -1, ctrl);
+                            clearMap();
+                            bool x = isPointInPath(vertex, j, i);
+                            //cout<<"AAAAAA"<<endl;
+                            if(((x && !bossInside) || (!x && bossInside)) && ctrl)
+                            {
+                                floodFillControllo(i, j, -2, -1, ctrl);
+
+                                //cout<<i<<"asaaaaa "<<j<<endl;
+                                medioX = j;
+                                medioY = i;
+                                cout<<ctrl<<" "<<medioY<<" "<<medioX<<" "<<endl;
+                                if(ctrl)
+                                    found = true;
+                                //break;
+                            }
+                        }
+                        
+                    }
+                    if(found)
+                        break;
+                }
             }
             /*if(bossInside && isPointInPath(vertex, *minY + 1, (*minX + *maxX) / 2) == false) //NON OK GLI IF
             {
@@ -674,10 +810,12 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             //medioX = (player->getPassiX()[0] + player->getPassiX()[player->getPassiX().size()-1]) / 2;
             
             //for(int i = 0; i < vertex.size(); i++)
-            //    cout<<vertex[i].first<<" "<<vertex[i].second<<endl;
+                //cout<<vertex[i].first<<" "<<vertex[i].second<<endl;
             //cout<<endl;
-            cout<<medioY<<" "<<medioX<<endl;
+            //cout<<medioY<<" "<<medioX<<endl;
+
             floodFill(medioY, medioX, 7, -1);
+            
             /*switch(player->getPos())
             {
                 case 0:floodFill((*minY)+1,(*minX),7,-1); break;
@@ -710,7 +848,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
         }
         for(int i = 0; i < player->getSizePassi(); i++)
         {
-            for(int j = 0;j < player->getSizePassi(); j++){}
+            for(int j = 0; j < player->getSizePassi(); j++){}
                 //cout<<player->getPassiY()[i]<<" "<<player->getPassiX()[j]<<" "<<endl;                    
         }
     }
@@ -1140,17 +1278,25 @@ void GameHandler::updateRows_Cols()
 }
 void GameHandler::directionPlayer()
 {
-    if((player->getY() > rowsMin && player->getY() < rowsMax-1) && player->getX() < (height/2))
-        player->setPos(0); //sinistra
-    else if((player->getY() > rowsMin && player->getY() < rowsMax-1) && player->getX() >= (height/2))
-        player->setPos(2); //destra
-    else if((player->getX() > colsMin && player->getX() < colsMax-1) && player->getY() < (height/2))
-        player->setPos(1); //sopra
-    else if((player->getX() > colsMin && player->getX() < colsMax-1) && player->getY() >= (height/2))
-        player->setPos(3);  //sotto
+    if((player->getX()-200)/15 < ((colsMax + colsMin)/2))
+        player->setPosLeftRight(0); //sinistra
+    else if((player->getX()-200)/15 >= ((colsMax + colsMin)/2))
+        player->setPosLeftRight(1); //destra
+    if(player->getY()/15 < ((rowsMax + rowsMin)/2))
+        player->setPosUpDown(0); //sopra
+    else if(player->getY()/15 >= ((rowsMax + rowsMin)/2))
+        player->setPosUpDown(1); //sotto
 }
 void GameHandler::clearMap()
 {
+    for(int i = rowsMin; i < rowsMax; i++)
+    {
+        for(int j = colsMin; j < colsMax; j++)
+        {
+            if(logic_map[i][j] == -2)
+                logic_map[i][j] = 0;
+        }
+    }
     /*if(player->getLeft())
     {
         for(int i = rowsMin; i < rowsMax; i++)
@@ -1221,6 +1367,27 @@ void GameHandler:: floodFill(int x,int y,int fill_color,int boundary_color)
             floodFill(x-1,y-1,fill_color,boundary_color);*/
     }
 }
+void GameHandler:: floodFillControllo(int x,int y,int fill_color,int boundary_color, bool &controllo)
+{
+    if(logic_map[x][y] != 4 && logic_map[x][y] != 1 && logic_map[x][y] != boundary_color && controllo
+     && logic_map[x][y] != fill_color)
+    {
+        if(logic_map[x][y] == 3)
+        {
+            controllo = false;
+            return;
+        }
+        logic_map[x][y] = fill_color;
+        if(x + 1 < rowsMax)
+            floodFillControllo(x+1,y,fill_color,boundary_color, controllo);
+        if(y + 1 < colsMax)
+            floodFillControllo(x,y+1,fill_color,boundary_color, controllo);
+        if(x - 1 >= rowsMin)
+            floodFillControllo(x-1,y,fill_color,boundary_color, controllo);
+        if(y - 1 >= colsMin)
+            floodFillControllo(x,y-1,fill_color,boundary_color, controllo);
+    }
+}
 bool GameHandler::isPointInPath(vector< pair<int,int> > vertex, int x, int y)
 {
     int i = 0, j = vertex.size() - 1;
@@ -1231,10 +1398,10 @@ bool GameHandler::isPointInPath(vector< pair<int,int> > vertex, int x, int y)
     {
         int xi = vertex[i].second, yi = vertex[i].first;
         int xj = vertex[j].second, yj = vertex[j].first;
-        bool intersect = ((yi > y) != (yj > y))
-            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-        /*bool intersect = ((xi > x) != (xj > x))
-            && (y < (yj - yi) * (x - xi) / (xj - xi) + yi);*/
+        /*bool intersect = ((yi > y) != (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);*/
+        bool intersect = ((xi > x) != (xj > x))
+            && (y < (yj - yi) * (x - xi) / (xj - xi) + yi);
         if (intersect) inside = !inside;
 
         /*if(((vertex[i].second > x) != (vertex[j].second > x)) && (y < vertex[i].first + (vertex[j].first - vertex[i].first)
