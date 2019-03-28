@@ -18,6 +18,7 @@ GameHandler::GameHandler(): width(816), height(616), FPS(30)
     load_map();
     read_map();
     background_bw = al_load_bitmap("../Images/backgroundBW.png");
+    board = al_load_bitmap("../Images/board.png");
     if (!background_bw)
     {
         cout<<"failed background bw";
@@ -89,6 +90,7 @@ void GameHandler::Game()
         {
             redraw = false;           
             printBG();
+            printBoard();
             /*boss->print();
             for(int i = 0; i < enemies.size(); i++)
             {
@@ -104,6 +106,17 @@ void GameHandler::Game()
 void GameHandler::printBG()
 {
     al_draw_bitmap(background_bw, 200, 0, 0);
+}
+void GameHandler::printBoard()
+{
+    for(int i = rowsMin; i < rowsMax; i++)
+    {
+        for(int j = colsMin; j < colsMax; j++)
+        {
+            if(logic_map[i][j] == 1)
+                al_draw_bitmap(board, (j * 15) + 200, (i * 15) , 0);
+        }
+    }
 }
 void GameHandler::scale()
 {
@@ -573,7 +586,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
 
             bossInside = isPointInPath(vertex, bossX, bossY); // OK
             cout<<bossInside<<endl;
-            /*for(int i = rowsMin; i < rowsMax; i++)
+            for(int i = rowsMin; i < rowsMax; i++)
             {
                 bool found = false;
                 for(int j = colsMin; j < colsMax; j++)
@@ -600,10 +613,11 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                             //break;
                         }
                     }
+                    
                 }
                 if(found)
                     break;
-            }*/
+            }
             /*if(bossInside && isPointInPath(vertex, *minY + 1, (*minX + *maxX) / 2) == false) //NON OK GLI IF
             {
 
@@ -1197,6 +1211,14 @@ void GameHandler:: floodFill(int x,int y,int fill_color,int boundary_color)
             floodFill(x-1,y,fill_color,boundary_color);
         if(y - 1 >= colsMin)
             floodFill(x,y-1,fill_color,boundary_color);
+        /*if(x + 1 < rowsMax && y + 1 < colsMax)
+            floodFill(x+1,y+1,fill_color,boundary_color);
+        if(x + 1 < rowsMax && y - 1 >= colsMin)
+            floodFill(x+1,y-1,fill_color,boundary_color);
+        if(x - 1 >= rowsMin && y + 1 < colsMax)
+            floodFill(x-1,y+1,fill_color,boundary_color);
+        if(x - 1 >= rowsMin && y - 1 >= colsMin)
+            floodFill(x-1,y-1,fill_color,boundary_color);*/
     }
 }
 bool GameHandler::isPointInPath(vector< pair<int,int> > vertex, int x, int y)
@@ -1204,14 +1226,23 @@ bool GameHandler::isPointInPath(vector< pair<int,int> > vertex, int x, int y)
     int i = 0, j = vertex.size() - 1;
     bool trovatoLeft = false;
     bool trovatoRight = false;
+    bool inside = false;
     for(i; i < vertex.size(); i++)
     {
-        if(((vertex[i].second > x) != (vertex[j].second > x)) && (y < vertex[i].first + (vertex[j].first - vertex[i].first)
+        int xi = vertex[i].second, yi = vertex[i].first;
+        int xj = vertex[j].second, yj = vertex[j].first;
+        bool intersect = ((yi > y) != (yj > y))
+            && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        /*bool intersect = ((xi > x) != (xj > x))
+            && (y < (yj - yi) * (x - xi) / (xj - xi) + yi);*/
+        if (intersect) inside = !inside;
+
+        /*if(((vertex[i].second > x) != (vertex[j].second > x)) && (y < vertex[i].first + (vertex[j].first - vertex[i].first)
          * (x - vertex[i].second) / (vertex[j].second - vertex[i].second))) //IL BOSS LO TROVA
         {
             return true;
             //break;        
-        }
+        }*/
         /*if(((vertex[i].second <= x) && ( x < vertex[j].second)) || ((vertex[j].second <= x) && ( x < vertex[i].second)))
         {
             if(y < (vertex[j].first - vertex[i].first) * (x - vertex[i].second) / (vertex[j].second - vertex[i].second) + vertex[i].first)
@@ -1248,5 +1279,6 @@ bool GameHandler::isPointInPath(vector< pair<int,int> > vertex, int x, int y)
         j = i;
     }
     //return trovatoLeft && trovatoRight;
-    return false;
+    //return false;
+    return inside;
 }

@@ -17,6 +17,7 @@ class GameHandler
         int scaleY;*/
         ALLEGRO_BITMAP *background_bw;
         ALLEGRO_BITMAP *background;
+        ALLEGRO_BITMAP *board;
         ALLEGRO_TIMER *timer;
         bool redraw;
         bool comodo = true;
@@ -36,6 +37,7 @@ class GameHandler
         GameHandler();
         void Game();
         void printBG();
+        void printBoard();
         void setCurrentPos(int, int, int);
         void scale();
         void load_map();
