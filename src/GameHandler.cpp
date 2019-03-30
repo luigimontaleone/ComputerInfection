@@ -631,8 +631,8 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 bossUpDown = 0; //sopra
             else if(boss->getY()/15 >= ((rowsMax + rowsMin)/2))
                 bossUpDown = 1;
-            cout<<bossInside<<endl;
-            if(*minY == *maxY)
+            //cout<<"boss inside "<<bossInside<<endl;
+            /*if(*minY == *maxY)
             {
                 if(bossUpDown == 0 && player->getPosUpDown() == 0)
                 {
@@ -712,12 +712,13 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 
             }
             else
-            {
+            {*/
                 for(int i = rowsMin; i < rowsMax; i++)
                 {
                     bool found = false;
                     for(int j = colsMin; j < colsMax; j++)
                     {
+                        
                         bool uguale = false;
                         for(int p = 0; p < player->getPassiY().size(); p++)
                         {
@@ -728,23 +729,27 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                                 break;
                             }
                         }
-                        if(!uguale && logic_map[i][j] != 7 && logic_map[i][j] != 1)
-                        {
+                        if(!uguale && logic_map[i][j] != 7 && logic_map[i][j] != 1 && !found
+                        && logic_map[i][j] != 4)
+                        { 
                             bool ctrl = true;
-                            //floodFillControllo(i, j, -2, -1, ctrl);
+                            floodFillControllo(i, j, -2, -1, ctrl);
                             clearMap();
+                            cout<<ctrl<<endl;
+                            //cout<<ctrl<<" "<<i<<" "<<j<<endl;
+                            //floodFillControllo(i, j, -2, -1, ctrl);
+                            //clearMap();
                             bool x = isPointInPath(vertex, j, i);
                             //cout<<"AAAAAA"<<endl;
-                            if(((x && !bossInside) || (!x && bossInside)) && ctrl)
+                            if(ctrl)//((x && !bossInside) || (!x && bossInside)) && ctrl)
                             {
-                                floodFillControllo(i, j, -2, -1, ctrl);
-
+                                
                                 //cout<<i<<"asaaaaa "<<j<<endl;
                                 medioX = j;
                                 medioY = i;
-                                cout<<ctrl<<" "<<medioY<<" "<<medioX<<" "<<endl;
-                                if(ctrl)
-                                    found = true;
+                                //cout<<ctrl<<endl<<" "<<medioY<<" "<<medioX<<" "<<endl;
+                                
+                                found = true;
                                 //break;
                             }
                         }
@@ -753,7 +758,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     if(found)
                         break;
                 }
-            }
+            //}
             /*if(bossInside && isPointInPath(vertex, *minY + 1, (*minX + *maxX) / 2) == false) //NON OK GLI IF
             {
 
@@ -1386,6 +1391,11 @@ void GameHandler:: floodFillControllo(int x,int y,int fill_color,int boundary_co
             floodFillControllo(x-1,y,fill_color,boundary_color, controllo);
         if(y - 1 >= colsMin)
             floodFillControllo(x,y-1,fill_color,boundary_color, controllo);
+        //    floodFillControllo(x+1,y+1,fill_color,boundary_color, controllo);
+          //  floodFillControllo(x+1,y-1,fill_color,boundary_color, controllo);
+           // floodFillControllo(x-1,y+1,fill_color,boundary_color, controllo);
+           // floodFillControllo(x-1,y-1,fill_color,boundary_color, controllo);
+
     }
 }
 bool GameHandler::isPointInPath(vector< pair<int,int> > vertex, int x, int y)

@@ -1,5 +1,9 @@
 #include "Player.h"
 #include "Enemy.h"
+//#include "Map.h"
+//#include "BorderHandler.h"
+#ifndef GAMEHANDLER_H
+#define GAMEHANDLER_H
 class GameHandler
 {
     private:
@@ -9,15 +13,14 @@ class GameHandler
         Player *player;
         Enemy *boss;
         vector<Enemy*> enemies;
+        //Map *map;
+        //BorderHandler *borderHandler;
         const int width;
         const int height;
-        /*int scaleW;
+        int scaleW;
         int scaleH;
         int scaleX;
-        int scaleY;*/
-        ALLEGRO_BITMAP *background_bw;
-        ALLEGRO_BITMAP *background;
-        ALLEGRO_BITMAP *board;
+        int scaleY;
         ALLEGRO_TIMER *timer;
         bool redraw;
         bool comodo = true;
@@ -28,7 +31,9 @@ class GameHandler
         int colsMin;
         int cont = 0;
         const float FPS;
-
+        ALLEGRO_BITMAP *background_bw;
+        ALLEGRO_BITMAP *background;
+        ALLEGRO_BITMAP *board;
         bool playerCutting(int&, int&);
         void updateRows_Cols();
         void directionPlayer();
@@ -52,3 +57,4 @@ class GameHandler
         void floodFill(int,int,int,int);
         void floodFillControllo(int,int,int,int,bool&);
 };
+#endif
