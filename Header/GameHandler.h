@@ -1,6 +1,6 @@
 #include "Player.h"
 #include "Enemy.h"
-//#include "Map.h"
+#include "Map.h"
 //#include "BorderHandler.h"
 #ifndef GAMEHANDLER_H
 #define GAMEHANDLER_H
@@ -13,46 +13,30 @@ class GameHandler
         Player *player;
         Enemy *boss;
         vector<Enemy*> enemies;
-        //Map *map;
+        Map *map;
         //BorderHandler *borderHandler;
         const int width;
         const int height;
-        int scaleW;
+        /*int scaleW;
         int scaleH;
         int scaleX;
-        int scaleY;
+        int scaleY;*/
         ALLEGRO_TIMER *timer;
         bool redraw;
         bool comodo = true;
-        int logic_map[40][40];
-        int rowsMax;
-        int rowsMin;
-        int colsMax;
-        int colsMin;
         int cont = 0;
         const float FPS;
-        ALLEGRO_BITMAP *background_bw;
-        ALLEGRO_BITMAP *background;
-        ALLEGRO_BITMAP *board;
         bool playerCutting(int&, int&);
-        void updateRows_Cols();
-        void directionPlayer();
+        bool lastOne;
 
     public:
         GameHandler();
         void Game();
-        void printBG();
-        void printBoard();
-        void setCurrentPos(int, int, int);
         void scale();
-        void load_map();
-        void read_map();
-        int read_something_from_map(int, int);
+        void initPos();
         void movePlayer(ALLEGRO_EVENT);
         void moveEnemy(int, bool);
         bool collision(int, int, bool);
-        void min_max(int&, int&, bool);
-        void clearMap();
         bool isPointInPath(vector< pair<int,int> >, int, int);
         void floodFill(int,int,int,int);
         void floodFillControllo(int,int,int,int,bool&);

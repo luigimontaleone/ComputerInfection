@@ -4,6 +4,7 @@ Player::Player(int x, int y, string path):Entity(x, y, path, 32, 15)
     lives = 3;
     score = 0;
     cutting = false;
+    comingBack = false;
 }
 
 void Player::aggiungiPassiX(int x)
@@ -27,9 +28,13 @@ void Player::svuotaPassi()
     passiX.clear();
     passiY.clear();
 }
-int Player::getSizePassi()
+void Player::popBackPassi()
 {
-    return passiX.size();
+    if(!passiX.empty())
+    {
+        passiX.pop_back();
+        passiY.pop_back();
+    }
 }
 int Player::getLives()
 {
@@ -71,19 +76,11 @@ void Player::moveLeft()
 {
     x -= speed;
 }
-void Player::setPosUpDown(int l)
+bool Player::getComingBack()
 {
-    posUpDown = l;
+    return comingBack;
 }
-int Player::getPosUpDown()
+void Player::setComingBack(bool cb)
 {
-    return posUpDown;
-}
-void Player::setPosLeftRight(int l)
-{
-    posLeftRight = l;
-}
-int Player::getPosLeftRight()
-{
-    return posLeftRight;
+    comingBack = cb;
 }

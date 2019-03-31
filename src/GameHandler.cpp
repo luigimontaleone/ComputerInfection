@@ -2,11 +2,7 @@
 
 GameHandler::GameHandler(): width(816), height(616), FPS(30)
 {
-    //srand(time(0));
-    rowsMax = 40;
-    rowsMin = 0;
-    colsMax = 40;
-    colsMin = 0;
+    map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/background.png", (char*)"../Images/board.png");
     redraw = true;
     display = al_create_display(width, height);
     if(!display)
@@ -15,26 +11,13 @@ GameHandler::GameHandler(): width(816), height(616), FPS(30)
         return;
     }
     timer = al_create_timer(1.0 / FPS);
-    load_map();
-    read_map();
-    background_bw = al_load_bitmap("../Images/backgroundBW.png");
-    board = al_load_bitmap("../Images/board.png");
-    if (!background_bw)
-    {
-        cout<<"failed background bw";
-        return;
-    }
-    background = al_load_bitmap("../Images/background.png");
-    if (!background)
-    {
-        cout<<"failed background";
-        return;
-    }
-
+    map->load_map("../maps/map1.txt");
+    lastOne = true;
+    initPos();
 }
 void GameHandler::Game()
 {
-    printBG();
+    map->printBG();
     ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -48,18 +31,45 @@ void GameHandler::Game()
         {
             redraw = true;
         al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
-        if(al_key_down(&currently, ALLEGRO_KEY_SPACE) &&
-         (al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
-         al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
-            player->setCutting(true); //Se sono prewhy when i press a key on my keyboard  it values is for 3muti contemporaneamente una delle freccette e la barra
+        if(al_key_down(&currently, ALLEGRO_KEY_SPACE))// &&
+         //(al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
+         //al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT))) //se sono premuti contemporaneamente
+        {               
+            player->setCutting(true);
+            movePlayer(evPrec);
+        }
         else
         {
             player->setCutting(false);
+            if(player->getPassiX().empty())
+            {
+                comodo = true;
+                movePlayer(evPrec);
+            }
+            else
+            {
+                if(lastOne)
+                {
+                    player->aggiungiPassiX((player->getX() - 200) / 15);
+                    player->aggiungiPassiY((player->getY()) / 15);
+                    lastOne = false;
+                }
+                int x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
+                int y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
+                player->setX((x_tmp * 15) + 200);
+                player->setY(y_tmp * 15);
+                //cout<<player->getPassiX().size()<<" ";
+                if(player->getPassiX().size() > 1)
+                    map->writeOnMap(y_tmp, x_tmp, 0);
+                else
+                {
+                    map->writeOnMap(y_tmp, x_tmp, 1);
+                    lastOne = true;
+                }
+                player->popBackPassi();
+                //cout<<player->getPassiX().size()<<endl;
+            }         
         }
-        //if(evPrec.keyboard.keycode == ALLEGRO_KEY_LEFT || evPrec.keyboard.keycode == ALLEGRO_KEY_UP || evPrec.keyboard.keycode == ALLEGRO_KEY_RIGHT
-           //|| evPrec.keyboard.keycode == ALLEGRO_KEY_DOWN)
-        movePlayer(evPrec);
-        
         /*for(int i = 0; i < enemies.size(); i++)
         {
             moveEnemy(i, false); 
@@ -76,11 +86,11 @@ void GameHandler::Game()
         }
         if(ev.keyboard.keycode == ALLEGRO_KEY_L)
         {
-            for(int i=0;i<40;i++)
+            for(int i = 0; i < 40; i++)
             {
-                for(int j=0;j<40;j++)
+                for(int j = 0; j < 40; j++)
                 {
-                    cout<<logic_map[i][j]<<" ";
+                    cout<<map->readFromMap(i,j)<<" ";
                 }
                 cout<<endl;
             }
@@ -89,8 +99,8 @@ void GameHandler::Game()
         if (redraw && al_is_event_queue_empty(event_queue))
         {
             redraw = false;           
-            printBG();
-            printBoard();
+            map->printBG();
+            map->printBorder();
             boss->print();
             for(int i = 0; i < enemies.size(); i++)
             {
@@ -102,21 +112,6 @@ void GameHandler::Game()
         }
     }
     
-}
-void GameHandler::printBG()
-{
-    al_draw_bitmap(background_bw, 200, 0, 0);
-}
-void GameHandler::printBoard()
-{
-    for(int i = rowsMin; i < rowsMax; i++)
-    {
-        for(int j = colsMin; j < colsMax; j++)
-        {
-            if(logic_map[i][j] == 1)
-                al_draw_bitmap(board, (j * 15) + 200, (i * 15) , 0);
-        }
-    }
 }
 void GameHandler::scale()
 {
@@ -130,121 +125,60 @@ void GameHandler::scale()
     scaleY = disp_data.height / 2;
     */
 }
-void GameHandler::load_map()
+void GameHandler::initPos()
 {
-    ifstream map("../maps/map1.txt");
-    char ch;
-    int c;
-    int i = 0;
-    int j = 0;
-    while(!map.eof())
+    bool createBoss = true;
+    bool createPlayer = true;
+    for (int i = map->getRowsMin(); i < map->getRowsMax(); i++)
     {
-        map>>logic_map[i][j];
-        j++;
-        if(j >= colsMax)
-        {
-            j = 0;
-            i++;
-        }
-    }
-    map.close();
-}
-void GameHandler::read_map()
-{
-    bool create = true;
-    bool create2 = create;
-    for (int i = rowsMin; i < rowsMax; i++)
-    {
-        for (int j = colsMin; j < colsMax; j++)
+        for (int j = map->getColsMin(); j < map->getColsMax(); j++)
         {
 
-            if (logic_map[i][j] == 3 && create)
+            if (map->readFromMap(i,j) == 3 && createBoss)
             {
                 boss = new Enemy(j * 15 + 200, i * 15 , "../Images/enemy.png", true, 3);
-                create = false;
+                createBoss = false;
             }
-            else if (logic_map[i][j] == 4 && enemies.size() < 9)
+            else if (map->readFromMap(i,j) == 4 && enemies.size() < 9)
             {
                 enemies.push_back(new Enemy(j * 15 + 200, i * 15, "../Images/enemy2.png", false, 3));
             }
-            else if (logic_map[i][j] == 1 && create2)
+            else if (map->readFromMap(i,j) == 1 && createPlayer)
             {
                 player = new Player((j * 15 + 200), i * 15, "../Images/pc.png");
-                create2 = false;
+                createPlayer = false;
             }
         }
     }
 }
-int GameHandler::read_something_from_map(int i, int j)
-{
-    return logic_map[i][j];
-}
-void GameHandler::setCurrentPos(int i, int j, int value)
-{
-    logic_map[i][j] = value;
-}
 void GameHandler::movePlayer(ALLEGRO_EVENT ev)
 {
-    //cout<<cont<<endl;
     if(player->getCutting())
     {
         bool sostituisci = false;
         int x2 = 0, y2 = 0;
-        /*switch(ev.keyboard.keycode)
-        {                           
-            case ALLEGRO_KEY_UP:
-                y2 -= (player->getSpeed());
-                sostituisci = playerCutting(x2, y2);
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
-                    break;
-                player->moveUp();
-                break;
-            case ALLEGRO_KEY_DOWN:
-                y2 += (player->getSpeed());
-                sostituisci = playerCutting(x2, y2);
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
-                    break;
-                player->moveDown();
-                break;
-            case ALLEGRO_KEY_LEFT:
-                x2 -= (player->getSpeed());
-                sostituisci = playerCutting(x2, y2);
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
-                    break;
-                player->moveLeft();
-                break;
-            case ALLEGRO_KEY_RIGHT:
-                x2 += (player->getSpeed());
-                sostituisci = playerCutting(x2, y2);
-                if(x2 > 39 || y2 > 39 || x2 < 0 || y2 < 0)
-                    break;
-                player->moveRight();
-                break;
-            default:
-                break;
-        }*/
         switch(ev.keyboard.keycode)
         {                           
             case ALLEGRO_KEY_UP:
                 y2 -= (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                //cout<<logic_map[y2][x2]<<endl;
-                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
+                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
                     break;
-                if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
+                if(map->readFromMap(y2, x2) == 1)
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                     sostituisci = true;
                 }
                 else
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                 }
                 if (comodo)
                 {
-                    directionPlayer();
-                    setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
+                    cout<<"ciao"<<endl;
+                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
                 player->aggiungiPassiX((player->getX() - 200) / 15);
@@ -255,22 +189,22 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 y2 += (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                //cout<<logic_map[y2][x2]<<endl;
-                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
+                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
                     break;
-                if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
+                if(map->readFromMap(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                     sostituisci = true;
                 }
                 else
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                 }
                 if (comodo)
                 {
-                    directionPlayer();
-                    setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
+                    cout<<"ciao"<<endl;
+                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
                 
@@ -282,22 +216,22 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 -= (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                //cout<<logic_map[y2][x2]<<endl;
-                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
+                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
                     break;
-                if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
+                if(map->readFromMap(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                     sostituisci = true;
                 }
                 else
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                 }
                 if (comodo)
                 {
-                    directionPlayer();
-                    setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
+                    cout<<"ciao"<<endl;
+                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
                 player->aggiungiPassiX((player->getX() - 200) / 15);
@@ -309,21 +243,22 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 //cout<<logic_map[y2][x2]<<endl;
-                if(x2 > colsMax-1 || y2 > rowsMax-1 || x2 < colsMin || y2 < rowsMin || logic_map[y2][x2] == 7)
+                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7) 
                     break;
-                if(read_something_from_map(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
+                if(map->readFromMap(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                     sostituisci = true;
                 }
                 else
                 {
-                    setCurrentPos(y2, x2, -1);
+                    map->writeOnMap(y2, x2, -1);
                 }
                 if (comodo)
                 {
-                    directionPlayer();
-                    setCurrentPos((player->getY()) / 15, (player->getX() - 200) / 15, -1);
+                    cout<<"ciao"<<endl;
+                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
                 player->aggiungiPassiX((player->getX() - 200) / 15);
@@ -344,6 +279,10 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             cont++;
             //cout<<cont<<endl;
                    
+            for(int i = 0; i < player->getPassiX().size(); i++)
+            {
+                //cout<<player->getPassiY()[i]<<" "<<player->getPassiX()[i]<<endl;
+            }
             auto maxX = max_element(player->getPassiX().begin(),player->getPassiX().end()); 
             auto maxY = max_element(player->getPassiY().begin(),player->getPassiY().end());
             auto minX = min_element(player->getPassiX().begin(),player->getPassiX().end());
@@ -395,76 +334,6 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
            // logic_map[(*maxY)][(*minX)] = -1;
             //logic_map[(*minY)][(*maxX)] = -1;
             //cout<<endl;
-            for(int i = (*minY); i <= (*maxY); i++)
-            {
-                for(int j = (*minX); j <= (*maxX); j++)
-                {
-                   /* if(*minX == 0 && *maxX < 39)
-                    {
-                        if(*minY == 0 && *maxY < 39)
-                        {
-                            logic_map[(*maxY)][(*minX)] = -1;
-                            logic_map[(*minY)][(*maxX)] = -1;
-                        }
-                        else if(*minY > 0 && *maxY == 39)
-                        {
-                            logic_map[(*maxY)][(*maxX)] = -1;
-                            logic_map[(*minY)][(*minX)] = -1;
-                        }
-                        else if(*minY > 0 && *maxY < 39)
-                        {
-                            logic_map[(*minY)][(*minX)] = -1;
-                            logic_map[(*maxY)][(*minX)] = -1;
-                        }
-                    }
-                    else if(*minX > 0 && *maxX == 39)
-                    {
-                        if(*minY == 0 && *maxY < 39)
-                        {
-                            logic_map[(*maxY)][(*maxX)] = -1;
-                            logic_map[(*minY)][(*minX)] = -1;
-                        }
-                        else if(*minY > 0 && *maxY == 39)
-                        {
-                            logic_map[(*minY)][(*maxX)] = -1;
-                            logic_map[(*maxY)][(*minX)] = -1;
-                        }
-                        else if(*minY > 0 && *maxY < 39)
-                        {
-                            logic_map[(*minY)][(*maxX)] = -1;
-                            logic_map[(*maxY)][(*maxX)] = -1;
-                        }
-                    }
-                    else if(*minX > 0 && *maxX < 39)
-                    {
-                        if(*minY == 0 && *maxY < 39)
-                        {
-                            logic_map[(*minY)][(*minX)] = -1;
-                            logic_map[(*minY)][(*maxX)] = -1;
-                        }
-                        else if(*minY > 0 && *maxY == 39)
-                        {
-                            logic_map[(*maxY)][(*minX)] = -1;
-                            logic_map[(*maxY)][(*maxX)] = -1;
-                        }
-                        else if(*minY > 0 && *maxY < 39)
-                        {
-                            logic_map[(*minY)][(*minX)] = -1;
-                            logic_map[(*minY)][(*maxX)] = -1;
-                        }
-                    }*/
-                    
-                    //mancano le combinazioni con Y e l'ultima di X
-                    //if(logic_map[i][j] != -1 )
-                    //{
-                        
-                        //logic_map[i][j] = 7;
-                        
-                    //}
-                    
-                }
-                //cout<<endl;
-            }
             //player->svuotaPassi();   
             //17 e 18 funzionano ma non si riesce a provarli senza stoppare i nemici, il gioco si blocca
             /*if(*minX == *maxX)                      
@@ -620,7 +489,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 vertex.push_back(vertexInFin);
             } //quarto
             */
-            bossInside = isPointInPath(vertex, bossX, bossY); // OK
+            /*bossInside = isPointInPath(vertex, bossX, bossY); // OK
             int bossUpDown = -1;
             int bossLeftRight = -1;
             if((boss->getX()-200)/15 < ((colsMax + colsMin)/2))
@@ -630,7 +499,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             if(boss->getY()/15 < ((rowsMax + rowsMin)/2))
                 bossUpDown = 0; //sopra
             else if(boss->getY()/15 >= ((rowsMax + rowsMin)/2))
-                bossUpDown = 1;
+                bossUpDown = 1;*/
             //cout<<"boss inside "<<bossInside<<endl;
             /*if(*minY == *maxY)
             {
@@ -713,10 +582,10 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             }
             else
             {*/
-                for(int i = rowsMin; i < rowsMax; i++)
+                for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
                 {
                     bool found = false;
-                    for(int j = colsMin; j < colsMax; j++)
+                    for(int j = map->getColsMin(); j < map->getColsMax(); j++)
                     {
                         
                         bool uguale = false;
@@ -729,16 +598,12 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                                 break;
                             }
                         }
-                        if(!uguale && logic_map[i][j] != 7 && logic_map[i][j] != 1 && !found
-                        && logic_map[i][j] != 4)
+                        if(!uguale && map->readFromMap(i, j) != 7 && map->readFromMap(i, j) != 1 && !found
+                        && map->readFromMap(i, j) != 4)
                         { 
                             bool ctrl = true;
                             floodFillControllo(i, j, -2, -1, ctrl);
-                            clearMap();
-                            cout<<ctrl<<endl;
-                            //cout<<ctrl<<" "<<i<<" "<<j<<endl;
-                            //floodFillControllo(i, j, -2, -1, ctrl);
-                            //clearMap();
+                            map->clearMap();
                             bool x = isPointInPath(vertex, j, i);
                             //cout<<"AAAAAA"<<endl;
                             if(ctrl)//((x && !bossInside) || (!x && bossInside)) && ctrl)
@@ -833,53 +698,48 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             {
 
                 
-                for(int i = rowsMin; i < rowsMax; i++)
+                for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
                 {
-                    for(int j = colsMin; j < colsMax; j++)
+                    for(int j = map->getColsMin(); j < map->getColsMax(); j++)
                     {
-                        if(logic_map[i][j] == -1)
-                            logic_map[i][j] = 1;
+                        if(map->readFromMap(i, j) == -1)
+                            map->writeOnMap(i, j, 1);
                     }
                 }
                 player->svuotaPassi();
                 cont = 0;
                 comodo = true;
                 //cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl;
-               	updateRows_Cols();
+               	map->updateRows_Cols();
                 //cout<<rowsMin<<" "<<rowsMax<<" "<<colsMin<<" "<<colsMax<<endl<<endl;
-                //clearMap();
+                
 
             }
-        }
-        for(int i = 0; i < player->getSizePassi(); i++)
-        {
-            for(int j = 0; j < player->getSizePassi(); j++){}
-                //cout<<player->getPassiY()[i]<<" "<<player->getPassiX()[j]<<" "<<endl;                    
         }
     }
     else
     {
-        switch(ev.keyboard.keycode)
-        {
-            case ALLEGRO_KEY_UP:
-                if(collision(player->getX(), player->getY() - player->getSpeed(), true))
-                    player->moveUp();
-                break;
-            case ALLEGRO_KEY_DOWN:
-                if(collision(player->getX(), player->getY() + player->getSpeed(), true))
-                    player->moveDown();
-                break;
-            case ALLEGRO_KEY_RIGHT:
-                if(collision(player->getX() + player->getSpeed(), player->getY(), true))
-                    player->moveRight();
-                break;
-            case ALLEGRO_KEY_LEFT:
-                if(collision(player->getX() - player->getSpeed(), player->getY(), true))
-                    player->moveLeft();
-                break;
-            default:
-                break;
-        }
+            switch(ev.keyboard.keycode)
+            {
+                case ALLEGRO_KEY_UP:
+                    if(collision(player->getX(), player->getY() - player->getSpeed(), true))
+                        player->moveUp();
+                    break;
+                case ALLEGRO_KEY_DOWN:
+                    if(collision(player->getX(), player->getY() + player->getSpeed(), true))
+                        player->moveDown();
+                    break;
+                case ALLEGRO_KEY_RIGHT:
+                    if(collision(player->getX() + player->getSpeed(), player->getY(), true))
+                        player->moveRight();
+                    break;
+                case ALLEGRO_KEY_LEFT:
+                    if(collision(player->getX() - player->getSpeed(), player->getY(), true))
+                        player->moveLeft();
+                    break;
+                default:
+                    break;
+            }        
     }
 }
 bool GameHandler::playerCutting(int &x, int &y)
@@ -893,13 +753,13 @@ bool GameHandler::playerCutting(int &x, int &y)
     /*cout<<(player->getY() / 15);
     cout<<" "<<((player->getX() - 200) / 15)<<endl;
     cout<<y<<" "<<x<<endl;*/
-    if(read_something_from_map(y, x) == 1) //PROBLEMA entra alla prima iterazione 
+    if(map->readFromMap(y, x) == 1) //PROBLEMA entra alla prima iterazione 
     {
         return true;
     }
     else
     {
-        setCurrentPos(y, x, -1);
+        map->writeOnMap(y, x, -1);
     }
     return false;
       
@@ -1155,144 +1015,22 @@ bool GameHandler::collision(int x, int y, bool isPlayer)
         x = (x - 200 - 32) / 15;
         y = (y - 32) / 15;
     }
-    int something = read_something_from_map(y, x);
+    int something = map->readFromMap(y, x);
     if(something != 1 && isPlayer)
         return false;
     
     x2 = (x2 - 200 + 64) / 15;
     y2 = (y2 + 64) / 15;
 
-    if(((read_something_from_map(y, x) != 0 && read_something_from_map(y, x) != 3 )
-    || (read_something_from_map(y2, x) != 0 && read_something_from_map(y2, x) != 3 )
-    || (read_something_from_map(y, x2) != 0 && read_something_from_map(y, x2) != 3 )
-    || (read_something_from_map(y2, x2) != 0 && read_something_from_map(y2, x2) != 3 ))
+    if(((map->readFromMap(y, x) != 0 && map->readFromMap(y, x) != 3 )
+    || (map->readFromMap(y2, x) != 0 && map->readFromMap(y2, x) != 3 )
+    || (map->readFromMap(y, x2) != 0 && map->readFromMap(y, x2) != 3 )
+    || (map->readFromMap(y2, x2) != 0 && map->readFromMap(y2, x2) != 3 ))
     && !isPlayer)
         return false;
     return true;
 }
-void GameHandler::min_max(int &i, int &j, bool min)
-{
-    vector<int> pY;
-    vector<int> pX;
-    if(min)
-    {
-        for(int i = 0; i < 40; i++)
-        {
-            bool considera = false;
-            for(int j = 0; j < 40; j++)
-            {
-                if(logic_map[i][j] == 1)
-                {
-                    considera = true;
-                    pX.push_back(j);
-                }
-            }
-            if(considera)
-                pY.push_back(i);
-        }
-        i = *min_element(pY.begin(), pY.end());
-        j = *min_element(pX.begin(), pX.end());
-    }
-    else
-    {
-        for(int i = 0; i < 40; i++)
-        {
-            bool considera = false;
-            for(int j = 0; j < 40; j++)
-            {
-                if(logic_map[i][j] == 1)
-                {
-                    considera = true;
-                    pX.push_back(j);
-                }
-            }
-            if(considera)
-                pY.push_back(i);
-        }
-        i = *max_element(pY.begin(), pY.end());
-        j = *max_element(pX.begin(), pX.end());
-    }
-    
-}
-
-void GameHandler::updateRows_Cols()
-{
-
-    bool rigaMin = true;
-    bool rigaMax = true;
-    bool colonnaMin = true;
-    bool colonnaMax = true;
-    for(int i = rowsMin; i < rowsMax; i++)
-    {
-        bool rigaNonMinima = true;
-        for(int j = colsMin; j < colsMax; j++)
-        {
-            if(logic_map[i][j] == 0)
-                rigaNonMinima = false;
-        }
-        if( !rigaNonMinima  && rigaMin)
-        {
-            rowsMin = i - 1;
-            rigaMin = false;
-        }
-    }
-    for(int i = colsMin; i < colsMax; i++)
-    {
-        bool colonnaNonMinima = true;
-        for(int j = rowsMin; j < rowsMax; j++)
-        {
-            if(logic_map[j][i] == 0)
-                colonnaNonMinima = false;
-        }
-        if( !colonnaNonMinima  && colonnaMin)
-        {
-            colsMin = i - 1;
-            colonnaMin = false;
-        }
-    }
-    /*for(int i = (rowsMax-1); i >= rowsMin; i--)
-    {
-        bool rigaNonMassima = true;
-        for(int j = colsMin; j < colsMax; j++)
-        {
-            if(logic_map[i][j] == 0)
-                rigaNonMassima = false;
-
-        }
-        if( !rigaNonMassima  && rigaMax)
-        {
-            rowsMax = (i + 2);
-            rigaMax = false;
-        }
-    }
-    for(int i = (colsMax-1); i >= colsMin; i--)
-    {
-        bool colonnaNonMassima = true;
-        for(int j = rowsMin; j < rowsMax; j++)
-        {
-            if(logic_map[i][j] == 0)
-                colonnaNonMassima = false;
-
-        }
-        if(!colonnaNonMassima  && colonnaMax)
-        {
-            colsMax = (i + 2);
-            colonnaMax = false;
-        }
-    }*/
-}
-void GameHandler::directionPlayer()
-{
-    if((player->getX()-200)/15 < ((colsMax + colsMin)/2))
-        player->setPosLeftRight(0); //sinistra
-    else if((player->getX()-200)/15 >= ((colsMax + colsMin)/2))
-        player->setPosLeftRight(1); //destra
-    if(player->getY()/15 < ((rowsMax + rowsMin)/2))
-        player->setPosUpDown(0); //sopra
-    else if(player->getY()/15 >= ((rowsMax + rowsMin)/2))
-        player->setPosUpDown(1); //sotto
-}
-void GameHandler::clearMap()
+/*void GameHandler::clearMap()
 {
     for(int i = rowsMin; i < rowsMax; i++)
     {
@@ -1302,65 +1040,19 @@ void GameHandler::clearMap()
                 logic_map[i][j] = 0;
         }
     }
-    /*if(player->getLeft())
-    {
-        for(int i = rowsMin; i < rowsMax; i++)
-        {
-            bool clear = false;
-            for(int j = colsMin; j < colsMax-1; j++)
-            {
-                if(logic_map[i][j] == 1)
-                {
-                    clear = true;
-                }
-                if(logic_map[i][j] == 0)
-                {
-                    break;
-                }
-                if(logic_map[i][j] == 7 && clear)
-                {
-                    logic_map[i][j] = 0;
-                }
-
-            }
-        }
-    }
-    else
-    {
-        for(int i = rowsMin; i < rowsMax; i++)
-        {
-            bool clear = false;
-            for(int j = colsMax - 1; j >= colsMin; j--)
-            {
-                if(logic_map[i][j] == 1)
-                {
-                    clear = true;
-                }
-                if(logic_map[i][j] == 0)
-                {
-                    break;
-                }
-                if(logic_map[i][j] == 7 && clear)
-                {
-                    logic_map[i][j] = 0;
-                }
-
-            }
-        }
-    }*/
-}
-void GameHandler:: floodFill(int x,int y,int fill_color,int boundary_color)
+}*/
+void GameHandler:: floodFill(int x, int y, int fill_color, int boundary_color)
 {
-    if(logic_map[x][y] != fill_color && logic_map[x][y] != boundary_color)
+    if(map->readFromMap(x,y) != fill_color && map->readFromMap(x,y) != boundary_color)
     {
-        logic_map[x][y] = fill_color;
-        if(x + 1 < rowsMax)
+        map->writeOnMap(x, y, fill_color);
+        if(x + 1 < map->getRowsMax())
             floodFill(x+1,y,fill_color,boundary_color);
-        if(y + 1 < colsMax)
+        if(y + 1 < map->getColsMax())
             floodFill(x,y+1,fill_color,boundary_color);
-        if(x - 1 >= rowsMin)
+        if(x - 1 >= map->getRowsMin())
             floodFill(x-1,y,fill_color,boundary_color);
-        if(y - 1 >= colsMin)
+        if(y - 1 >= map->getColsMin())
             floodFill(x,y-1,fill_color,boundary_color);
         /*if(x + 1 < rowsMax && y + 1 < colsMax)
             floodFill(x+1,y+1,fill_color,boundary_color);
@@ -1374,22 +1066,22 @@ void GameHandler:: floodFill(int x,int y,int fill_color,int boundary_color)
 }
 void GameHandler:: floodFillControllo(int x,int y,int fill_color,int boundary_color, bool &controllo)
 {
-    if(logic_map[x][y] != 4 && logic_map[x][y] != 1 && logic_map[x][y] != boundary_color && controllo
-     && logic_map[x][y] != fill_color)
+    if(map->readFromMap(x,y) != 4 && map->readFromMap(x,y) != 1 && map->readFromMap(x,y) != boundary_color && controllo
+     && map->readFromMap(x,y) != fill_color)
     {
-        if(logic_map[x][y] == 3)
+        if(map->readFromMap(x,y) == 3)
         {
             controllo = false;
             return;
         }
-        logic_map[x][y] = fill_color;
-        if(x + 1 < rowsMax)
+        map->writeOnMap(x, y, fill_color);
+        if(x + 1 < map->getRowsMax())
             floodFillControllo(x+1,y,fill_color,boundary_color, controllo);
-        if(y + 1 < colsMax)
+        if(y + 1 < map->getColsMax())
             floodFillControllo(x,y+1,fill_color,boundary_color, controllo);
-        if(x - 1 >= rowsMin)
+        if(x - 1 >= map->getRowsMin())
             floodFillControllo(x-1,y,fill_color,boundary_color, controllo);
-        if(y - 1 >= colsMin)
+        if(y - 1 >= map->getColsMin())
             floodFillControllo(x,y-1,fill_color,boundary_color, controllo);
         //    floodFillControllo(x+1,y+1,fill_color,boundary_color, controllo);
           //  floodFillControllo(x+1,y-1,fill_color,boundary_color, controllo);

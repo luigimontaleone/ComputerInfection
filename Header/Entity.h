@@ -7,7 +7,6 @@
 #include "allegro5/allegro_primitives.h"
 #include <string>
 #include <iostream>
-#include <fstream>
 #include <cstdlib>
 #include <time.h>
 #include <vector>

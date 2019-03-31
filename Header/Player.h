@@ -12,19 +12,20 @@ class Player : public Entity
         bool cutting;
         int posUpDown;
         int posLeftRight;
-
-        
+        bool comingBack;
     public:
         Player(int x, int y, string path);
         void aggiungiPassiX(int);
         void aggiungiPassiY(int);
         const vector<int>& getPassiX();
         const vector<int>& getPassiY();
+        void popBackPassi();
         void svuotaPassi();
-        int getSizePassi();
         int getLives();
         int getScore();
         bool getCutting();
+        bool getComingBack();
+        void setComingBack(bool);
         void setCutting(bool);
         void decreaseLives();
         void increaseScore();  
@@ -32,9 +33,6 @@ class Player : public Entity
         void moveDown();
         void moveRight();
         void moveLeft();
-        int getPosUpDown();
-        void setPosUpDown(int);
-        int getPosLeftRight();
-        void setPosLeftRight(int);
+        
 };
 #endif
