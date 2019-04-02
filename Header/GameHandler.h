@@ -28,7 +28,6 @@ class GameHandler
         const float FPS;
         bool playerCutting(int&, int&);
         bool lastOne;
-
     public:
         GameHandler();
         void Game();
@@ -37,7 +36,6 @@ class GameHandler
         void movePlayer(ALLEGRO_EVENT);
         void moveEnemy(int, bool);
         bool collision(int, int, bool);
-        bool isPointInPath(vector< pair<int,int> >, int, int);
         void floodFill(int,int,int,int);
         void floodFillControllo(int,int,int,int,bool&);
 };

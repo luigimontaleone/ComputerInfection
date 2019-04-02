@@ -14,6 +14,7 @@ class Map
         ALLEGRO_BITMAP *background_bw;
         ALLEGRO_BITMAP *background;
         ALLEGRO_BITMAP *border;
+        ALLEGRO_BITMAP *saturation;
         int logic_map[40][40];
         int rowsMax;
         int rowsMin;

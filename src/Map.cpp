@@ -4,6 +4,7 @@ Map::Map(){}
 Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* bg, char* b): 
 rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
 {
+    saturation = al_load_bitmap("../Images/prova.png");
     border = al_load_bitmap(b);
     if (!border)
     {
@@ -45,6 +46,8 @@ void Map::printBorder()
         {
             if(logic_map[i][j] == 1)
                 al_draw_bitmap(border, (j * 15) + 200, (i * 15) , 0);
+            if(logic_map[i][j] == 7)
+                al_draw_bitmap(saturation, (j * 15) + 200, (i * 15) , 0);
         }
     }
 }
