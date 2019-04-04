@@ -106,7 +106,7 @@ void GameHandler::Game()
             }
             player->print();
             al_flip_display();
-            al_clear_to_color(al_map_rgb(0,0,0));
+            al_clear_to_color(al_map_rgb(0, 0, 0));
         }
     }
     
@@ -201,7 +201,6 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    cout<<"ciao"<<endl;
                     map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -228,7 +227,6 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    cout<<"ciao"<<endl;
                     map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -240,11 +238,10 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 += (player->getSpeed());
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
-                //cout<<logic_map[y2][x2]<<endl;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
                  x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7) 
                     break;
-                if(map->readFromMap(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
+                if(map->readFromMap(y2, x2) == 1)  
                 {
                     map->writeOnMap(y2, x2, -1);
                     sostituisci = true;
@@ -255,7 +252,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    cout<<"ciao"<<endl;
+                    //cout<<"ciao"<<endl;
                     map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
