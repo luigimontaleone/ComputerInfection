@@ -20,21 +20,25 @@ class Map
         int rowsMin;
         int colsMax;
         int colsMin;
+        const int maximumRows = 40;
+        const int maximumCols = 40;
     public:
         Map();
         Map(int, int, int, int, char*, char*, char*);
         ~Map();
-        void printBG();
-        void printBorder();
+        void printBG() const;
+        void printBorder() const;
         void writeOnMap(int, int, int);
-        int readFromMap(int, int);
+        int readFromMap(int, int) const;
         void clearMap();
         void load_map(string);
         //void read_map();
-        int getRowsMax();
-        int getRowsMin();
-        int getColsMax();
-        int getColsMin();
+        int getRowsMax() const;
+        int getRowsMin() const;
+        int getColsMax() const;
+        int getColsMin() const;
+        int getMaximumCols() const;
+        int getMaximumRows() const;
         void updateRows_Cols();
 
 };

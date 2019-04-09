@@ -34,12 +34,12 @@ Map::~Map()
     al_destroy_bitmap(border);
 }
 
-void Map::printBG()
+void Map::printBG() const
 {
     al_draw_bitmap(background_bw, 200, 0, 0);
 }
 
-void Map::printBorder()
+void Map::printBorder() const
 {
     for(int i = rowsMin; i < rowsMax; i++)
     {
@@ -61,7 +61,7 @@ void Map::printBorder()
     }
 }
 
-int Map::readFromMap(int i, int j)
+int Map::readFromMap(int i, int j) const
 {
     return logic_map[i][j];
 }
@@ -168,7 +168,9 @@ void Map::load_map(string path)
     }
     map.close();
 }
-int Map::getRowsMax() { return rowsMax; }
-int Map::getRowsMin() { return rowsMin; }
-int Map::getColsMax() { return colsMax; }
-int Map::getColsMin() { return colsMin; }
+int Map::getRowsMax() const { return rowsMax; }
+int Map::getRowsMin() const { return rowsMin; }
+int Map::getColsMax() const { return colsMax; }
+int Map::getColsMin() const { return colsMin; }
+int Map::getMaximumCols() const { return maximumCols;}
+int Map::getMaximumRows() const { return maximumRows;}

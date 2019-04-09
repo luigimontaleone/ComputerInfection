@@ -1,22 +1,25 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "Map.h"
+#include "CollisionHandler.h"
 //#include "BorderHandler.h"
 #ifndef GAMEHANDLER_H
 #define GAMEHANDLER_H
 class GameHandler
 {
     private:
-        //ALLEGRO_DISPLAY_MODE disp_data;
+        ALLEGRO_DISPLAY_MODE disp_data;
+        ALLEGRO_TRANSFORM trans;
         ALLEGRO_DISPLAY *display;
         ALLEGRO_KEYBOARD_STATE currently;
         Player *player;
         Enemy *boss;
         vector<Enemy*> enemies;
         Map *map;
+        CollisionHandler *collisionHandler;
         //BorderHandler *borderHandler;
-        const int width;
-        const int height;
+         int width;
+         int height;
         /*int scaleW;
         int scaleH;
         int scaleX;
