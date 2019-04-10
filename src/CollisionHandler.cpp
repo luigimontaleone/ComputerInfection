@@ -1,6 +1,6 @@
 #include "../Header/CollisionHandler.h"
 
-bool CollisionHandler::enemyCollision(bool is_boss, const Map* map, int x, int y, bool &hit_player)
+bool CollisionHandler::enemyCollision(bool is_boss, const Map* map, int x, int y, bool &hit_player, bool &hit_enemy)
 {
     int x2 = x;
     int y2 = y;
@@ -29,15 +29,21 @@ bool CollisionHandler::enemyCollision(bool is_boss, const Map* map, int x, int y
 
     if(map->readFromMap(y,x) == -1 || map->readFromMap(y2,x) == -1 || map->readFromMap(y,x2) == -1
     || map->readFromMap(y2,x2) == -1)
+    {
         hit_player = true;
+        return false;
+    }
 
     if(map->readFromMap(y,x) == 1 || map->readFromMap(y2,x) == 1 || map->readFromMap(y,x2) == 1
     || map->readFromMap(y2,x2) == 1)
         return false;
 
-    /*if(map->readFromMap(y,x) == 7 || map->readFromMap(y2,x) == 7 || map->readFromMap(y,x2) == 7
+    if(map->readFromMap(y,x) == 7 || map->readFromMap(y2,x) == 7 || map->readFromMap(y,x2) == 7
     || map->readFromMap(y2,x2) == 7)
-        hit_enemy = true;*/ // ??? 
+    {
+        hit_enemy = true;
+        return false;
+    }
         
     return true;
 }

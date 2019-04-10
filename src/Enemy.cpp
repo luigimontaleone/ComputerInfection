@@ -1,6 +1,7 @@
 #include"../Header/Enemy.h"
 Enemy::Enemy(int x, int y, string path, bool is_boss, int speed): Entity(x, y, path, 32, speed)
 {
+    alive = true;
     this->is_boss = is_boss;
     if(is_boss)
         size = 64;
@@ -51,4 +52,14 @@ void Enemy::set_dir(int dir)
 int Enemy::get_dir()
 {
     return dir;
+}
+
+void Enemy::die()
+{
+    alive = false;
+}
+
+bool Enemy::getAlive()
+{
+    return alive;
 }

@@ -5,24 +5,20 @@ GameHandler::GameHandler(): FPS(30)
     map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/background.png", (char*)"../Images/board.png");
     collisionHandler = new CollisionHandler();
     redraw = true;
-    al_get_display_mode(al_get_num_display_modes() - 1, &disp_data);
-    
-    al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+    al_get_display_mode(al_get_num_display_modes() / 2, &disp_data);
+    //al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     width = disp_data.width;
     height = disp_data.height;
+    int screenWidth = 816;
+    int screenHeight = 616;
+    float scaleX = (width / (float) screenWidth);
+    float scaleY = (height / (float) screenHeight);
     display = al_create_display(width, height);
-
     if(!display)
     {
         cout<<"failed to create display";
         return;
     }
-    int screenWidth = 816;
-    int screenHeight = 616;
-
-    float scaleX = width / (float) screenWidth;
-    float scaleY = height / (float) screenHeight;
-
     al_identity_transform(&trans);
     al_scale_transform(&trans, scaleX, scaleY);
     al_use_transform(&trans);
@@ -46,50 +42,51 @@ void GameHandler::Game()
         if(ev.type == ALLEGRO_EVENT_TIMER)
         {
             redraw = true;
-        al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
-        if(al_key_down(&currently, ALLEGRO_KEY_SPACE))// &&
-         //(al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
-         //al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
-        {               
-            player->setCutting(true);
-            movePlayer(evPrec);
-        }
-        else
-        {
-            player->setCutting(false);
-            if(player->getPassiX().empty())
+            for(int i = 0; i < enemies.size(); i++)
             {
-                comodo = true;
+                moveEnemy(i, false); 
+            }
+            moveEnemy(0, true);
+            al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
+            if(al_key_down(&currently, ALLEGRO_KEY_SPACE))// &&
+            //(al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
+            //al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
+            {               
+                player->setCutting(true);
                 movePlayer(evPrec);
             }
             else
             {
-                if(lastOne)
+                player->setCutting(false);
+                if(player->getPassiX().empty())
                 {
-                    player->aggiungiPassiX((player->getX() - 200) / 15);
-                    player->aggiungiPassiY((player->getY()) / 15);
-                    lastOne = false;
+                    comodo = true;
+                    movePlayer(evPrec);
                 }
-                int x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
-                int y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
-                player->setX((x_tmp * 15) + 200);
-                player->setY(y_tmp * 15);
-                if(player->getPassiX().size() > 1)
-                    map->writeOnMap(y_tmp, x_tmp, 0);
                 else
                 {
-                    map->writeOnMap(y_tmp, x_tmp, 1);
-                    lastOne = true;
+                    if(lastOne)
+                    {
+                        player->aggiungiPassiX((player->getX() - 200) / 15);
+                        player->aggiungiPassiY((player->getY()) / 15);
+                        lastOne = false;
+                    }
+                    int x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
+                    int y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
+                    player->setX((x_tmp * 15) + 200);
+                    player->setY(y_tmp * 15);
+                    if(player->getPassiX().size() > 1)
+                        map->writeOnMap(y_tmp, x_tmp, 0);
+                    else
+                    {
+                        map->writeOnMap(y_tmp, x_tmp, 1);
+                        lastOne = true;
+                    }
+                    player->popBackPassi();
                 }
-                player->popBackPassi();
             }         
         }
-        for(int i = 0; i < enemies.size(); i++)
-        {
-            moveEnemy(i, false); 
-        }
-        //moveEnemy(0, true);
-        }
+        
         if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
         {
             evPrec = ev;
@@ -118,7 +115,8 @@ void GameHandler::Game()
             boss->print();
             for(int i = 0; i < enemies.size(); i++)
             {
-                enemies[i]->print();
+                if(enemies[i]->getAlive())
+                    enemies[i]->print();
             }
             player->print();
             al_flip_display();
@@ -388,235 +386,77 @@ void GameHandler::moveEnemy(int i, bool is_boss)
     {
         dir = enemies[i]->get_dir();
     }
-    /*switch (dir)
+    bool hit_player = false;
+    bool hit_enemy = false;
+    switch (dir)
     {
         case 1:
             
-            if((collision(boss->getX() + boss->getSpeed(), boss->getY(), false) == false) || (collision(enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 2:
-            if((collision(boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), false) == false) || (collision(enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }            
             break;
         case 3:
-            if((collision(boss->getX(), boss->getY() + boss->getSpeed(), false) == false) || (collision(enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 4:
-            if((collision(boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), false) == false) || (collision(enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 5:
-            if((collision(boss->getX() - boss->getSpeed(), boss->getY(), false) == false) || (collision(enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 6:
-            if((collision(boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), false) == false) || (collision(enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 7:
-            if((collision(boss->getX(), boss->getY() - boss->getSpeed(), false) == false) || (collision(enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 8:
-            if((collision(boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), false) == false) || (collision(enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), false) == false))
+            if((!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         default:
             break;
-    }*/
-    bool hit_player = false;
-    if(!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player) ||
-    !collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() + boss->getSpeed(), hit_player) ||
-    !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player) ||
-    !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY(), hit_player) ||
-    !collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() - boss->getSpeed(), hit_player) ||
-    !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player) ||
-    !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player) ||
-    !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player))
-        collisione = true;
-
-    if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player) == false ||
-    collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player) == false ||
-    collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player) == false ||
-    collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player) == false ||
-    collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player) == false ||
-    collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player) == false ||
-    collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player) == false ||
-    collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player) == false)
-        collisione = true;            
-    if(collisione)
+    }
+ 
+    if(hit_enemy)
+        enemies[i]->die();       
+    else if(collisione && enemies[i]->getAlive())
     {
         while (!trovato)
         {
             int new_dir = (rand()%8) + 1;
             switch (new_dir)
             {
-                /*case 1:
-                    if(is_boss)
-                    {  
-                        if(collision(boss->getX() + boss->getSpeed(), boss->getY(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 2:
-                    if(is_boss)
-                    {
-                        if(collision(boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 3:
-                    if(is_boss)
-                    {
-                        if(collision(boss->getX(), boss->getY() + boss->getSpeed(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 4:
-                    if(is_boss)
-                    {
-                        if(collision(boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 5:
-                    if(is_boss)
-                    {
-                        if(collision(boss->getX() - boss->getSpeed(), boss->getY(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 6:
-                    if(is_boss)
-                    {
-                        if(collision(boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 7:
-                    if(is_boss)
-                    {
-                        if(collision(boss->getX(), boss->getY() - boss->getSpeed(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 8:
-                    if(is_boss)
-                    {
-                        if(collision(boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), false))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collision(enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), false))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;*/
+               
                 case 1:
                     if(is_boss)
                     {  
-                        if(collision(boss->getX() + boss->getSpeed(), boss->getY(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -624,7 +464,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -634,7 +474,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                 case 2:
                     if(is_boss)
                     {
-                        if(collision(boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -642,7 +482,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -652,7 +492,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                 case 3:
                     if(is_boss)
                     {
-                        if(collision(boss->getX(), boss->getY() + boss->getSpeed(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -660,7 +500,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -670,7 +510,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                 case 4:
                     if(is_boss)
                     {
-                        if(collision(boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -678,7 +518,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -688,7 +528,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                 case 5:
                     if(is_boss)
                     {
-                        if(collision(boss->getX() - boss->getSpeed(), boss->getY(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -696,7 +536,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -706,7 +546,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                 case 6:
                     if(is_boss)
                     {
-                        if(collision(boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -714,7 +554,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -724,7 +564,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                 case 7:
                     if(is_boss)
                     {
-                        if(collision(boss->getX(), boss->getY() - boss->getSpeed(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -732,7 +572,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -742,7 +582,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                 case 8:
                     if(is_boss)
                     {
-                        if(collision(boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), false))
+                        if(collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
                         {
                             boss->set_dir(new_dir);
                             trovato = true;
@@ -750,7 +590,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
                     }
                     else
                     {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player))
+                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy))
                         {
                             enemies[i]->set_dir(new_dir);
                             trovato = true;
@@ -762,10 +602,20 @@ void GameHandler::moveEnemy(int i, bool is_boss)
             }
         }
     }
+    if(hit_enemy)
+        enemies[i]->die();  
     if(is_boss)
+    {
+        map->writeOnMap((boss->getX() - 200)/ 15, boss->getY() / 15, 0);
         boss->move();
-    else
+        map->writeOnMap((boss->getX() - 200)/ 15, boss->getY() / 15, 3);
+    }
+    else if(enemies[i]->getAlive())
+    {
+        map->writeOnMap((enemies[i]->getX() - 200)/ 15, enemies[i]->getY() / 15, 0);
         enemies[i]->move();
+        map->writeOnMap((enemies[i]->getX() - 200)/ 15, enemies[i]->getY() / 15, 3);
+    }
 
 }
 bool GameHandler::collision(int x, int y, bool isPlayer)

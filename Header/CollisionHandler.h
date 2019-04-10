@@ -5,7 +5,7 @@
 class CollisionHandler
 {
     public:
-    bool enemyCollision(bool, const Map*, int, int, bool&);
+    bool enemyCollision(bool, const Map*, int, int, bool&, bool&);
     bool playerCollision(const Map*, int, int);
 
 };
