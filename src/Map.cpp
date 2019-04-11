@@ -6,7 +6,6 @@ Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* b
 rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
 {
     saturation = al_load_bitmap("../Images/prova.png");
-    //al_draw_tinted_bitmap(saturation, al_map_rgba_f(1, 1, 1, 0.5), 0, 0, 0);
     border = al_load_bitmap(b);
     if (!border)
     {
@@ -56,7 +55,7 @@ void Map::printBorder() const
         {
             if(logic_map[i][j] == 7)
             {
-                al_draw_tinted_bitmap(saturation, al_map_rgba_f(1, 0, 0, 0.1), (j * 15) + 200, i * 15, 0);
+                al_draw_tinted_bitmap(saturation, al_map_rgba_f(0, 0, 1, 0.1), (j * 15) + 200, i * 15, 0);
             }
         }
     }

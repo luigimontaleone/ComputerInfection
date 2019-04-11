@@ -47,7 +47,6 @@ void GameHandler::Game()
                 if(enemies[i]->getAlive())
                 {
                     moveEnemy(i, false); 
-                    //cout<<i<<" ";
                 }
             }
             //cout<<endl;
@@ -57,6 +56,7 @@ void GameHandler::Game()
             //(al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
             //al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
             {               
+                //if(map->readFromMap((player->getY() / 15), ((player->getX() - 200) / 15)) != 1)
                 player->setCutting(true);
                 movePlayer(evPrec);
             }
@@ -181,7 +181,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1)
                     break;
                 if(map->readFromMap(y2, x2) == 1)
                 {
@@ -194,7 +194,6 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    //cout<<"ciao"<<endl;
                     map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -207,9 +206,9 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1)
                     break;
-                if(map->readFromMap(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
+                if(map->readFromMap(y2, x2) == 1) 
                 {
                     map->writeOnMap(y2, x2, -1);
                     sostituisci = true;
@@ -233,9 +232,9 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1)
                     break;
-                if(map->readFromMap(y2, x2) == 1) //PROBLEMA entra alla prima iterazione 
+                if(map->readFromMap(y2, x2) == 1) 
                 {
                     map->writeOnMap(y2, x2, -1);
                     sostituisci = true;
@@ -258,7 +257,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7) 
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1) 
                     break;
                 if(map->readFromMap(y2, x2) == 1)  
                 {
@@ -271,7 +270,6 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 }
                 if (comodo)
                 {
-                    //cout<<"ciao"<<endl;
                     map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
                     comodo = false;
                 }
@@ -301,7 +299,6 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                     {
                         if(player->getPassiY()[p] == i && player->getPassiX()[p] == j)
                         {
-                            //cout<<"ciao"<<endl;
                             uguale = true;
                             break;
                         }
@@ -318,8 +315,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                             medioY = i;
                             found = true;
                         }
-                    }
-                    
+                    }                    
                 }
                 if(found)
                     break;
@@ -396,7 +392,6 @@ void GameHandler::moveEnemy(int i, bool is_boss)
     switch (dir)
     {
         case 1:
-            
             if((!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
             {
                 collisione = true;
@@ -447,14 +442,30 @@ void GameHandler::moveEnemy(int i, bool is_boss)
         default:
             break;
     }
- 
     if(hit_enemy)
-        enemies[i]->die();       
+        enemies[i]->die();
+    else if(hit_player)
+    {
+        player->aggiungiPassiX((player->getX() - 200) / 15);
+        player->aggiungiPassiY((player->getY()) / 15);
+        int x_tmp = player->getPassiX()[0];
+        int y_tmp = player->getPassiY()[0];
+        player->setX((x_tmp * 15) + 200);
+        player->setY(y_tmp * 15);
+        while(player->getPassiX().size() > 1)
+        {
+            x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
+            y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
+            map->writeOnMap(y_tmp, x_tmp, 0);
+            player->popBackPassi();
+        }
+    }
+    
     else if((collisione && enemies[i]->getAlive()) || (collisione && is_boss))
     {
         while (!trovato)
         {
-            int new_dir = (rand()%8) + 1;
+            int new_dir = (rand() % 8) + 1;
             switch (new_dir)
             {
                
@@ -607,15 +618,13 @@ void GameHandler::moveEnemy(int i, bool is_boss)
             }
         }
     }
-    if(hit_enemy)
-        enemies[i]->die();  
     if(is_boss)
     {
         //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<" ";
-        map->writeOnMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15, 0);
+        map->writeOnMap((boss->getY()) / 15, (boss->getX() - 200)/ 15, 0);
         //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<" ";
         boss->move();
-        map->writeOnMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15, 3);
+        map->writeOnMap((boss->getY()) / 15, (boss->getX() - 200)/ 15, 3);
         //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<endl;
     }
     else if(enemies[i]->getAlive())
