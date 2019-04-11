@@ -5,7 +5,7 @@ GameHandler::GameHandler(): FPS(30)
     map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/background.png", (char*)"../Images/board.png");
     collisionHandler = new CollisionHandler();
     redraw = true;
-    al_get_display_mode(al_get_num_display_modes() / 2, &disp_data);
+    al_get_display_mode(al_get_num_display_modes() -1, &disp_data);
     //al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     width = disp_data.width;
     height = disp_data.height;
@@ -44,8 +44,13 @@ void GameHandler::Game()
             redraw = true;
             for(int i = 0; i < enemies.size(); i++)
             {
-                moveEnemy(i, false); 
+                if(enemies[i]->getAlive())
+                {
+                    moveEnemy(i, false); 
+                    //cout<<i<<" ";
+                }
             }
+            //cout<<endl;
             moveEnemy(0, true);
             al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
             if(al_key_down(&currently, ALLEGRO_KEY_SPACE))// &&
@@ -445,7 +450,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
  
     if(hit_enemy)
         enemies[i]->die();       
-    else if(collisione && enemies[i]->getAlive())
+    else if((collisione && enemies[i]->getAlive()) || (collisione && is_boss))
     {
         while (!trovato)
         {
@@ -606,15 +611,18 @@ void GameHandler::moveEnemy(int i, bool is_boss)
         enemies[i]->die();  
     if(is_boss)
     {
-        map->writeOnMap((boss->getX() - 200)/ 15, boss->getY() / 15, 0);
+        //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<" ";
+        map->writeOnMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15, 0);
+        //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<" ";
         boss->move();
-        map->writeOnMap((boss->getX() - 200)/ 15, boss->getY() / 15, 3);
+        map->writeOnMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15, 3);
+        //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<endl;
     }
     else if(enemies[i]->getAlive())
     {
-        map->writeOnMap((enemies[i]->getX() - 200)/ 15, enemies[i]->getY() / 15, 0);
+        map->writeOnMap(enemies[i]->getY() / 15, (enemies[i]->getX() - 200)/ 15, 0);
         enemies[i]->move();
-        map->writeOnMap((enemies[i]->getX() - 200)/ 15, enemies[i]->getY() / 15, 3);
+        map->writeOnMap(enemies[i]->getY() / 15, (enemies[i]->getX() - 200)/ 15, 4);
     }
 
 }

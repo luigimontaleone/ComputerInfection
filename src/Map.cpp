@@ -1,6 +1,7 @@
 #include "../Header/Map.h"
 
 Map::Map(){}
+
 Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* bg, char* b): 
 rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
 {

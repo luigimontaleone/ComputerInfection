@@ -50,12 +50,10 @@ bool CollisionHandler::enemyCollision(bool is_boss, const Map* map, int x, int y
 
 bool CollisionHandler::playerCollision(const Map *map, int x, int y)
 {
-    int x2 = x;
-    int y2 = y;
     x = (x - 200) / 15;
     y = y / 15;
     if( x >= map->getMaximumCols() || y >= map->getMaximumRows() || x < 0 || y < 0)
         return false;
     int something = map->readFromMap(y, x);
-    return !(something != 1);
+    return !((something != 1));
 }
