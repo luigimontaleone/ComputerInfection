@@ -22,6 +22,16 @@ int main()
         cout<<"failed install keyboard";
         return -1;
     }
+    if(!al_init_font_addon())
+    {
+        cerr<<"failed to install font addon";
+        return 1;
+    }
+    if(!al_init_ttf_addon())
+    {
+        cerr<<"failed to install ttf addon";
+        return 1;
+    }
     
     GameHandler gamehandler;
     gamehandler.Game();

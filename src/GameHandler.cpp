@@ -2,6 +2,7 @@
 
 GameHandler::GameHandler(): FPS(30)
 {
+    font = al_load_ttf_font("../Font/Computerfont.ttf", 40, 0);
     map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/background.png", (char*)"../Images/board.png");
     collisionHandler = new CollisionHandler();
     redraw = true;
@@ -117,6 +118,7 @@ void GameHandler::Game()
             redraw = false;           
             map->printBG();
             map->printBorder();
+            printInfo();
             boss->print();
             for(int i = 0; i < enemies.size(); i++)
             {
@@ -332,6 +334,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
             player->svuotaPassi();
             comodo = true;
             map->updateRows_Cols();
+            map->updatePercent();
         }
     }
     else
@@ -707,4 +710,16 @@ void GameHandler:: floodFillControllo(int x,int y,int fill_color,int boundary_co
         if(y - 1 >= map->getColsMin())
             floodFillControllo(x,y-1,fill_color,boundary_color, controllo);
     }
+}
+
+void GameHandler::printInfo()
+{
+    ALLEGRO_COLOR colorFont;
+    colorFont = al_map_rgb(255,255,255);
+    string lives = "LIVES : " + to_string(player->getLives());
+    string score = "SCORE : "; //+ to_string(player->getP());
+    string percent = to_string(map->getPercent()) + "%";
+    al_draw_text(font, colorFont, 20, 50, 0,lives.c_str());
+    al_draw_text(font, colorFont, 20, 100, 0,score.c_str());
+    al_draw_text(font, colorFont, 20, 150, 0,percent.c_str());
 }

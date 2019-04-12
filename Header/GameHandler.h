@@ -12,6 +12,7 @@ class GameHandler
         ALLEGRO_TRANSFORM trans;
         ALLEGRO_DISPLAY *display;
         ALLEGRO_KEYBOARD_STATE currently;
+        ALLEGRO_FONT *font;
         Player *player;
         Enemy *boss;
         vector<Enemy*> enemies;
@@ -41,5 +42,6 @@ class GameHandler
         bool collision(int, int, bool);
         void floodFill(int,int,int,int);
         void floodFillControllo(int,int,int,int,bool&);
+        void printInfo();
 };
 #endif

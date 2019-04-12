@@ -20,6 +20,7 @@ class Map
         int rowsMin;
         int colsMax;
         int colsMin;
+        double percent;
         const int maximumRows = 40;
         const int maximumCols = 40;
     public:
@@ -40,6 +41,8 @@ class Map
         int getMaximumCols() const;
         int getMaximumRows() const;
         void updateRows_Cols();
+        float getPercent() const;
+        void updatePercent();
 
 };
 
