@@ -84,3 +84,7 @@ void Player::setComingBack(bool cb)
 {
     comingBack = cb;
 }
+void Player::setScore(int sc)
+{
+    score = sc;
+}

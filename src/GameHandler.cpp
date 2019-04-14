@@ -2,12 +2,13 @@
 
 GameHandler::GameHandler(): FPS(30)
 {
+    pressedSpaceBar = false;
     font = al_load_ttf_font("../Font/Computerfont.ttf", 40, 0);
     map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/background.png", (char*)"../Images/board.png");
     collisionHandler = new CollisionHandler();
     redraw = true;
-    al_get_display_mode(al_get_num_display_modes() -1, &disp_data);
-    //al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+    al_get_display_mode(0, &disp_data);
+    al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     width = disp_data.width;
     height = disp_data.height;
     int screenWidth = 816;
@@ -27,11 +28,13 @@ GameHandler::GameHandler(): FPS(30)
     map->load_map("../maps/map1.txt");
     lastOne = true;
     initPos();
+    map->setContEnemies(enemies.size());
+    event_queue = al_create_event_queue();
 }
 void GameHandler::Game()
 {
     map->printBG();
-    ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
+    //ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
@@ -40,6 +43,15 @@ void GameHandler::Game()
     while(1)
     {
         al_wait_for_event(event_queue, &ev);
+        if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+        {
+            al_destroy_display(display);
+            break;
+        }
+        if(ev.keyboard.keycode == ALLEGRO_KEY_SPACE)
+        {
+            pressedSpaceBar = true;
+        }        
         if(ev.type == ALLEGRO_EVENT_TIMER)
         {
             redraw = true;
@@ -50,14 +62,18 @@ void GameHandler::Game()
                     moveEnemy(i, false); 
                 }
             }
-            //cout<<endl;
             moveEnemy(0, true);
-            al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
-            if(al_key_down(&currently, ALLEGRO_KEY_SPACE))// &&
+            //al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
+            /*if(al_key_down(&currently, ALLEGRO_KEY_SPACE))// &&
             //(al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
             //al_key_down(&currently, ALLEGRO_KEY_LEFT) || al_key_down(&currently, ALLEGRO_KEY_RIGHT)))
             {               
                 //if(map->readFromMap((player->getY() / 15), ((player->getX() - 200) / 15)) != 1)
+                player->setCutting(true);
+                movePlayer(evPrec);
+            }*/
+            if(pressedSpaceBar)
+            {
                 player->setCutting(true);
                 movePlayer(evPrec);
             }
@@ -91,16 +107,16 @@ void GameHandler::Game()
                     player->popBackPassi();
                 }
             }         
-        }
-        
+        }      
         if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
-        {
             evPrec = ev;
-        }
+        
+        if(ev.type == ALLEGRO_EVENT_KEY_UP && ev.keyboard.keycode == ALLEGRO_KEY_SPACE)
+            pressedSpaceBar = false;
+        
         if(ev.type == ALLEGRO_EVENT_KEY_UP)
-        {
             evPrec.keyboard.keycode = 80;
-        }
+        
         if(ev.keyboard.keycode == ALLEGRO_KEY_L)
         {
             for(int i = 0; i < 40; i++)
@@ -183,7 +199,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1)
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
                     break;
                 if(map->readFromMap(y2, x2) == 1)
                 {
@@ -208,7 +224,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1)
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
                     break;
                 if(map->readFromMap(y2, x2) == 1) 
                 {
@@ -234,7 +250,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1)
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
                     break;
                 if(map->readFromMap(y2, x2) == 1) 
                 {
@@ -259,7 +275,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 x2 = (player->getX() - 200 + x2) / 15;
                 y2 = (player->getY() + y2) / 15;
                 if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)// || map->readFromMap(y2, x2) == 1) 
+                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7) 
                     break;
                 if(map->readFromMap(y2, x2) == 1)  
                 {
@@ -285,6 +301,7 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
         
         if(sostituisci)
         {
+            pressedSpaceBar = false;
             player->aggiungiPassiX((player->getX() - 200) / 15);
             player->aggiungiPassiY((player->getY()) / 15);
             
@@ -446,9 +463,12 @@ void GameHandler::moveEnemy(int i, bool is_boss)
             break;
     }
     if(hit_enemy)
+    {
         enemies[i]->die();
+    }
     else if(hit_player)
     {
+        pressedSpaceBar = false;
         player->aggiungiPassiX((player->getX() - 200) / 15);
         player->aggiungiPassiY((player->getY()) / 15);
         int x_tmp = player->getPassiX()[0];
@@ -462,6 +482,10 @@ void GameHandler::moveEnemy(int i, bool is_boss)
             map->writeOnMap(y_tmp, x_tmp, 0);
             player->popBackPassi();
         }
+        x_tmp = player->getPassiX()[0];
+        y_tmp = player->getPassiY()[0];
+        map->writeOnMap(y_tmp, x_tmp, 1);
+        player->popBackPassi();
     }
     
     else if((collisione && enemies[i]->getAlive()) || (collisione && is_boss))
@@ -638,43 +662,6 @@ void GameHandler::moveEnemy(int i, bool is_boss)
     }
 
 }
-bool GameHandler::collision(int x, int y, bool isPlayer)
-{
-    /*if (isPlayer)
-    {
-        if (x < 200 || y < 0 || x > width - player->getSize() || y > height - player->getSize())
-            return false;
-    }*/
-    int x2 = x;
-    int y2 = y;
-    if (isPlayer)
-    {
-        x = (x - 200) / 15;
-        y = y / 15;
-        //cout<<x<<" "<<y<< "(1)"<<endl;
-        if( x > 39 || y > 39 || x < 0 || y < 0)
-            return false;
-    } 
-    else
-    {
-        x = (x - 200 - 32) / 15;
-        y = (y - 32) / 15;
-    }
-    int something = map->readFromMap(y, x);
-    if(something != 1 && isPlayer)
-        return false;
-    
-    x2 = (x2 - 200 + 64) / 15;
-    y2 = (y2 + 64) / 15;
-
-    if(((map->readFromMap(y, x) != 0 && map->readFromMap(y, x) != 3 && map->readFromMap(y, x) != 4 )
-    || (map->readFromMap(y2, x) != 0 && map->readFromMap(y2, x) != 3 && map->readFromMap(y2, x) != 4 )
-    || (map->readFromMap(y, x2) != 0 && map->readFromMap(y, x2) != 3 && map->readFromMap(y, x2) != 4 )
-    || (map->readFromMap(y2, x2) != 0 && map->readFromMap(y2, x2) != 3 && map->readFromMap(y2, x2) != 4 ))
-    && !isPlayer)
-        return false;
-    return true;
-}
 void GameHandler:: floodFill(int x, int y, int fill_color, int boundary_color)
 {
     if(map->readFromMap(x,y) != fill_color && map->readFromMap(x,y) != boundary_color)
@@ -711,15 +698,15 @@ void GameHandler:: floodFillControllo(int x,int y,int fill_color,int boundary_co
             floodFillControllo(x,y-1,fill_color,boundary_color, controllo);
     }
 }
-
 void GameHandler::printInfo()
 {
     ALLEGRO_COLOR colorFont;
     colorFont = al_map_rgb(255,255,255);
     string lives = "LIVES : " + to_string(player->getLives());
-    string score = "SCORE : "; //+ to_string(player->getP());
+    player->setScore(map->getContSeven() * 5 + ((enemies.size() - map->getContEnemies()) * 50));
+    string score = "SCORE : " + to_string(player->getScore());
     string percent = to_string(map->getPercent()) + "%";
-    al_draw_text(font, colorFont, 20, 50, 0,lives.c_str());
-    al_draw_text(font, colorFont, 20, 100, 0,score.c_str());
-    al_draw_text(font, colorFont, 20, 150, 0,percent.c_str());
+    al_draw_text(font, colorFont, 20, 50, 0, lives.c_str());
+    al_draw_text(font, colorFont, 20, 100, 0, score.c_str());
+    al_draw_text(font, colorFont, 20, 150, 0, percent.c_str());
 }

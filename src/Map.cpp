@@ -3,8 +3,9 @@
 Map::Map(){}
 
 Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* bg, char* b): 
-rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax), percent(0.0)
+rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax), percent(0.0), contEnemies(0)
 {
+    contSeven = 0;
     saturation = al_load_bitmap("../Images/prova.png");
     border = al_load_bitmap(b);
     if (!border)
@@ -172,17 +173,23 @@ int Map::getRowsMax() const { return rowsMax; }
 int Map::getRowsMin() const { return rowsMin; }
 int Map::getColsMax() const { return colsMax; }
 int Map::getColsMin() const { return colsMin; }
-int Map::getMaximumCols() const { return maximumCols;}
-int Map::getMaximumRows() const { return maximumRows;}
-float Map::getPercent() const { return percent;}
-
+int Map::getMaximumCols() const { return maximumCols; }
+int Map::getMaximumRows() const { return maximumRows; }
+int Map::getPercent() const { return percent; }
+int Map::getContSeven() const { return contSeven; }
+int Map::getContEnemies() const { return contEnemies; }
+void Map::setContEnemies(int n)
+{
+    contEnemies = n;
+}
 void Map::updatePercent()
 {
-    int contSeven = 0;
+    int contEnemies = 0;
     for(int i = 0; i < maximumRows; i++)
         for(int j = 0; j < maximumCols; j++)
             if(logic_map[i][j] == 7)
                 contSeven++;
-    
+            else if(logic_map[i][j] == 4)
+                contEnemies++;
     percent = ((contSeven * 100) / (maximumCols * maximumRows));
 }

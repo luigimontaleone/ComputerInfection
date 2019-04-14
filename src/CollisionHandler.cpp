@@ -36,8 +36,6 @@ bool CollisionHandler::enemyCollision(bool is_boss, const Map* map, int x, int y
     if(map->readFromMap(y, x) == 1 || map->readFromMap(y2, x) == 1 || map->readFromMap(y, x2) == 1
     || map->readFromMap(y2, x2) == 1)
     { 
-        //if(is_boss)
-            //cout<<y<<" "<<x<<endl;
         return false;
     }
     if(map->readFromMap(y, x) == 7 || map->readFromMap(y2, x) == 7 || map->readFromMap(y, x2) == 7

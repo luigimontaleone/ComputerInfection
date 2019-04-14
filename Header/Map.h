@@ -20,7 +20,9 @@ class Map
         int rowsMin;
         int colsMax;
         int colsMin;
-        double percent;
+        int contSeven;
+        int percent;
+        int contEnemies;
         const int maximumRows = 40;
         const int maximumCols = 40;
     public:
@@ -33,15 +35,17 @@ class Map
         int readFromMap(int, int) const;
         void clearMap();
         void load_map(string);
-        //void read_map();
         int getRowsMax() const;
         int getRowsMin() const;
         int getColsMax() const;
         int getColsMin() const;
         int getMaximumCols() const;
         int getMaximumRows() const;
+        int getContSeven() const;
+        int getContEnemies() const;
         void updateRows_Cols();
-        float getPercent() const;
+        int getPercent() const;
+        void setContEnemies(int);
         void updatePercent();
 
 };

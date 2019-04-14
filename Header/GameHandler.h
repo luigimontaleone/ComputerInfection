@@ -8,6 +8,7 @@
 class GameHandler
 {
     private:
+        ALLEGRO_EVENT_QUEUE *event_queue;
         ALLEGRO_DISPLAY_MODE disp_data;
         ALLEGRO_TRANSFORM trans;
         ALLEGRO_DISPLAY *display;
@@ -32,6 +33,7 @@ class GameHandler
         const float FPS;
         bool playerCutting(int&, int&);
         bool lastOne;
+        bool pressedSpaceBar;
     public:
         GameHandler();
         void Game();

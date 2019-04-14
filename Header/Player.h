@@ -27,6 +27,7 @@ class Player : public Entity
         bool getComingBack();
         void setComingBack(bool);
         void setCutting(bool);
+        void setScore(int);
         void decreaseLives();
         void increaseScore();  
         void moveUp();
