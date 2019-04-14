@@ -28,6 +28,7 @@ class Entity
     public:
         Entity(int x, int y, string path, int size, int speed);
         Entity();
+        ~Entity();
         void setX(int X);
         int getX();
         void setY(int Y);
@@ -37,5 +38,6 @@ class Entity
         void setSize(int);
         int getSpeed();
         void setSpeed(int);
+        
 };
 #endif

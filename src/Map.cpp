@@ -2,7 +2,7 @@
 
 Map::Map(){}
 
-Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* bg, char* b): 
+Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* b): 
 rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax), percent(0.0), contEnemies(0)
 {
     contSeven = 0;
@@ -19,20 +19,14 @@ rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax), percent(
         cout<<"failed background bw";
         return;
     }
-    background = al_load_bitmap(bg);
-    if (!background)
-    {
-        cout<<"failed background";
-        return;
-    }
 
 }
 
 Map::~Map()
 {
-    al_destroy_bitmap(background);
     al_destroy_bitmap(background_bw);
     al_destroy_bitmap(border);
+    al_destroy_bitmap(saturation);
 }
 
 void Map::printBG() const
@@ -46,10 +40,14 @@ void Map::printBorder() const
     {
         for(int j = colsMin; j < colsMax; j++)
         {
-            if(logic_map[i][j] == 1)
+            if(logic_map[i][j] == 1 || logic_map[i][j] == -1)
                 al_draw_bitmap(border, (j * 15) + 200, (i * 15) , 0);
         }
     }
+}
+
+void Map::printSaturation() const
+{
     for(int i = 0; i < 40; i++)
     {
         for(int j = 0; j < 40; j++)
@@ -185,6 +183,7 @@ void Map::setContEnemies(int n)
 void Map::updatePercent()
 {
     int contEnemies = 0;
+    contSeven = 0;
     for(int i = 0; i < maximumRows; i++)
         for(int j = 0; j < maximumCols; j++)
             if(logic_map[i][j] == 7)
@@ -192,4 +191,4 @@ void Map::updatePercent()
             else if(logic_map[i][j] == 4)
                 contEnemies++;
     percent = ((contSeven * 100) / (maximumCols * maximumRows));
-}
+} 

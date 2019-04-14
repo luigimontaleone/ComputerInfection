@@ -36,3 +36,7 @@ int Entity::getSpeed()
 {
     return speed;
 }
+Entity::~Entity()
+{
+    al_destroy_bitmap(sprite);
+}

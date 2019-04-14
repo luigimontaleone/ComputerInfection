@@ -20,12 +20,8 @@ class GameHandler
         Map *map;
         CollisionHandler *collisionHandler;
         //BorderHandler *borderHandler;
-         int width;
-         int height;
-        /*int scaleW;
-        int scaleH;
-        int scaleX;
-        int scaleY;*/
+        int width;
+        int height;
         ALLEGRO_TIMER *timer;
         bool redraw;
         bool comodo = true;
@@ -36,6 +32,7 @@ class GameHandler
         bool pressedSpaceBar;
     public:
         GameHandler();
+        ~GameHandler();
         void Game();
         void scale();
         void initPos();

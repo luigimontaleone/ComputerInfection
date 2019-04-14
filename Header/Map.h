@@ -12,7 +12,6 @@ class Map
 {
     private:
         ALLEGRO_BITMAP *background_bw;
-        ALLEGRO_BITMAP *background;
         ALLEGRO_BITMAP *border;
         ALLEGRO_BITMAP *saturation;
         int logic_map[40][40];
@@ -27,10 +26,11 @@ class Map
         const int maximumCols = 40;
     public:
         Map();
-        Map(int, int, int, int, char*, char*, char*);
+        Map(int, int, int, int, char*, char*);
         ~Map();
         void printBG() const;
         void printBorder() const;
+        void printSaturation() const;
         void writeOnMap(int, int, int);
         int readFromMap(int, int) const;
         void clearMap();

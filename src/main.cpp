@@ -1,4 +1,5 @@
 #include "../Header/GameHandler.h"
+#include "../Header/Menu.h"
 #include <iostream>
 int main()
 {
@@ -32,8 +33,31 @@ int main()
         cerr<<"failed to install ttf addon";
         return 1;
     }
-    
-    GameHandler gamehandler;
-    gamehandler.Game();
+    Menu *menu = new Menu();
+    int choice = menu->showMenu();
+    while(choice != Menu::EXIT)
+    {
+        menu->closeDisplay();
+        switch (choice)
+        {
+            case Menu::PLAY :
+            {
+                GameHandler *gamehandler = new GameHandler();
+                gamehandler->Game();
+                delete gamehandler;
+                break;
+            }
+            case Menu::CREDITS :
+            {
+                break;
+            }
+        
+            default:
+                break;
+        }
+        menu->initDisplay();
+        choice = menu->showMenu();
+    }
+    delete menu;
     return 0;
 }

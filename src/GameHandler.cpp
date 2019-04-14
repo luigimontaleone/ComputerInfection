@@ -4,7 +4,7 @@ GameHandler::GameHandler(): FPS(30)
 {
     pressedSpaceBar = false;
     font = al_load_ttf_font("../Font/Computerfont.ttf", 40, 0);
-    map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/background.png", (char*)"../Images/board.png");
+    map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/board.png");
     collisionHandler = new CollisionHandler();
     redraw = true;
     al_get_display_mode(0, &disp_data);
@@ -34,7 +34,6 @@ GameHandler::GameHandler(): FPS(30)
 void GameHandler::Game()
 {
     map->printBG();
-    //ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
@@ -45,7 +44,6 @@ void GameHandler::Game()
         al_wait_for_event(event_queue, &ev);
         if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
         {
-            al_destroy_display(display);
             break;
         }
         if(ev.keyboard.keycode == ALLEGRO_KEY_SPACE)
@@ -63,6 +61,8 @@ void GameHandler::Game()
                 }
             }
             moveEnemy(0, true);
+            if(player->getLives() <= 0)
+                break;
             //al_get_keyboard_state(&currently); //Panoramica attuale di ciò che sta succedendo sulla tastiera
             /*if(al_key_down(&currently, ALLEGRO_KEY_SPACE))// &&
             //(al_key_down(&currently, ALLEGRO_KEY_UP) || al_key_down(&currently, ALLEGRO_KEY_DOWN) || 
@@ -84,6 +84,8 @@ void GameHandler::Game()
                 {
                     comodo = true;
                     movePlayer(evPrec);
+                    if(map->getPercent() >= 75)
+                        break;
                 }
                 else
                 {
@@ -134,6 +136,7 @@ void GameHandler::Game()
             redraw = false;           
             map->printBG();
             map->printBorder();
+            map->printSaturation();
             printInfo();
             boss->print();
             for(int i = 0; i < enemies.size(); i++)
@@ -146,7 +149,7 @@ void GameHandler::Game()
             al_clear_to_color(al_map_rgb(0, 0, 0));
         }
     }
-    
+    al_destroy_display(display);
 }
 void GameHandler::scale()
 {
@@ -297,7 +300,9 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 break;
             default:
                 break;
-        }     
+        }
+
+        map->printBorder();     
         
         if(sostituisci)
         {
@@ -468,6 +473,9 @@ void GameHandler::moveEnemy(int i, bool is_boss)
     }
     else if(hit_player)
     {
+        player->decreaseLives();
+        if(player->getLives() <= 0)
+            return;
         pressedSpaceBar = false;
         player->aggiungiPassiX((player->getX() - 200) / 15);
         player->aggiungiPassiY((player->getY()) / 15);
@@ -709,4 +717,20 @@ void GameHandler::printInfo()
     al_draw_text(font, colorFont, 20, 50, 0, lives.c_str());
     al_draw_text(font, colorFont, 20, 100, 0, score.c_str());
     al_draw_text(font, colorFont, 20, 150, 0, percent.c_str());
+}
+
+GameHandler::~GameHandler()
+{
+    al_destroy_event_queue(event_queue);
+    al_destroy_display(display);
+    al_destroy_font(font);
+    al_destroy_timer(timer);
+    delete player;
+    delete boss;
+    delete map;
+    delete collisionHandler;
+    for(int i = 0; i < enemies.size(); i++)
+    {
+        delete enemies[i];
+    }
 }
