@@ -2,7 +2,7 @@
 #include "Enemy.h"
 #include "Map.h"
 #include "CollisionHandler.h"
-//#include "BorderHandler.h"
+#include "BorderHandler.h"
 #ifndef GAMEHANDLER_H
 #define GAMEHANDLER_H
 class GameHandler
@@ -14,33 +14,29 @@ class GameHandler
         ALLEGRO_DISPLAY *display;
         ALLEGRO_KEYBOARD_STATE currently;
         ALLEGRO_FONT *font;
+        ALLEGRO_TIMER *timer;
         Player *player;
         Enemy *boss;
         vector<Enemy*> enemies;
         Map *map;
         CollisionHandler *collisionHandler;
-        //BorderHandler *borderHandler;
+        BorderHandler *borderHandler;
+        const float FPS;        
         int width;
         int height;
-        ALLEGRO_TIMER *timer;
         bool redraw;
-        bool comodo = true;
-        int cont = 0;
-        const float FPS;
-        bool playerCutting(int&, int&);
+        bool firstOne;
         bool lastOne;
         bool pressedSpaceBar;
-    public:
-        GameHandler();
-        ~GameHandler();
-        void Game();
+        bool playerCutting(int&, int&);
         void scale();
         void initPos();
         void movePlayer(ALLEGRO_EVENT);
         void moveEnemy(int, bool);
-        bool collision(int, int, bool);
-        void floodFill(int,int,int,int);
-        void floodFillControllo(int,int,int,int,bool&);
         void printInfo();
+    public:
+        GameHandler();
+        ~GameHandler();
+        void Game();
 };
 #endif

@@ -27,6 +27,9 @@ Map::~Map()
     al_destroy_bitmap(background_bw);
     al_destroy_bitmap(border);
     al_destroy_bitmap(saturation);
+    background_bw = nullptr;
+    border = nullptr;
+    saturation = nullptr;
 }
 
 void Map::printBG() const

@@ -37,7 +37,7 @@ int main()
     int choice = menu->showMenu();
     while(choice != Menu::EXIT)
     {
-        menu->closeDisplay();
+        delete menu;
         switch (choice)
         {
             case Menu::PLAY :
@@ -55,7 +55,7 @@ int main()
             default:
                 break;
         }
-        menu->initDisplay();
+        menu = new Menu();
         choice = menu->showMenu();
     }
     delete menu;
