@@ -3,6 +3,8 @@
 #include "Map.h"
 #include "CollisionHandler.h"
 #include "BorderHandler.h"
+#include <list>
+#include <dirent.h>
 #ifndef GAMEHANDLER_H
 #define GAMEHANDLER_H
 class GameHandler
@@ -20,14 +22,14 @@ class GameHandler
         vector<Enemy*> enemies;
         Map *map;
         CollisionHandler *collisionHandler;
+        list<string> levels;
         BorderHandler *borderHandler;
         const float FPS;        
         int width;
         int height;
         bool redraw;
         bool firstOne;
-
-        bool esci;
+        bool exit_clause;
         bool lastOne;
         bool pressedSpaceBar;
         bool playerCutting(int&, int&);
@@ -36,6 +38,7 @@ class GameHandler
         void movePlayer(ALLEGRO_EVENT);
         void moveEnemy(int, bool);
         void printInfo();
+        void setLevels();
     public:
         GameHandler();
         ~GameHandler();

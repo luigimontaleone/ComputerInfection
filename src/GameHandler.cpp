@@ -2,15 +2,18 @@
 
 GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false), redraw(true), lastOne(true), firstOne(true)
 {
-    font = al_load_ttf_font("../Font/Computerfont.ttf", 40, 0);
+    setLevels();
+    font = al_load_ttf_font("../Font/score.ttf", 35, 0);
     event_queue = al_create_event_queue();
     timer = al_create_timer(1.0 / FPS);
-    map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/board.png");
+    map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", 
+    (char*)"../Images/board.png", levels.front());
+    levels.pop_front();
     borderHandler = new BorderHandler();
     collisionHandler = new CollisionHandler();
     scale();
     initPos();
-    esci = false;
+    exit_clause = false;
     map->setContEnemies(enemies.size());
 }
 bool a = false;
@@ -22,7 +25,7 @@ void GameHandler::Game()
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
     ALLEGRO_EVENT ev, evPrec;
-    while(!esci)
+    while(!exit_clause)
     {
         al_wait_for_event(event_queue, &ev);
         if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
@@ -45,7 +48,10 @@ void GameHandler::Game()
             }
             moveEnemy(0, true);
             if(player->getLives() <= 0)
+            {
+                exit_clause = true;
                 break;
+            }
             if(map->getPercent() >= 75)
             {
                 pressedSpaceBar = false;
@@ -56,13 +62,18 @@ void GameHandler::Game()
                 enemies.clear();
                 delete player;
                 delete boss;
-                if(map->load_map())
+                delete map;
+                if(levels.empty())
                 {
-                    esci = true;
-                    cout<<"vuota";
+                    exit_clause = true;
+                    cout<<"vuota"<<endl;
                     break;
                 }
+                map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", 
+                (char*)"../Images/board.png", levels.front());
+                levels.pop_front();
                 initPos();
+                map->setContEnemies(enemies.size());
             }
             if(pressedSpaceBar)
             {
@@ -121,7 +132,7 @@ void GameHandler::Game()
         if(ev.type == ALLEGRO_EVENT_KEY_UP)
             evPrec.keyboard.keycode = 80;
         
-        if (redraw && al_is_event_queue_empty(event_queue) && !esci)
+        if (redraw && al_is_event_queue_empty(event_queue) && !exit_clause)
         {
             redraw = false;           
             map->printBG();
@@ -677,27 +688,46 @@ void GameHandler::printInfo()
     string score = "SCORE : " + to_string(player->getScore());
     string percent = to_string(map->getPercent()) + "%";
     al_draw_text(font, colorFont, 20, 50, 0, lives.c_str());
-    al_draw_text(font, colorFont, 20, 100, 0, score.c_str());
+    al_draw_text(font, colorFont, 5, 100, 0, score.c_str());
     al_draw_text(font, colorFont, 20, 150, 0, percent.c_str());
 }
-
 GameHandler::~GameHandler()
 {
     al_destroy_event_queue(event_queue);
     al_destroy_font(font);
     al_destroy_timer(timer);
-    /*
-    delete player;
-    delete boss;
-    */
-    delete map;
+    //delete player;
+    //delete boss;
+    //delete map;
     delete collisionHandler;
     delete borderHandler;
-    for(int i = 0; i < enemies.size(); i++)
+    /*for(int i = 0; i < enemies.size(); i++)
     {
         delete enemies[i];
-    }
+    }*/
     event_queue = nullptr;
     font = nullptr;
     timer = nullptr;
+}
+void GameHandler::setLevels()
+{
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir ("../maps")) != NULL)
+    {
+        while ((ent = readdir (dir)) != NULL)
+        {
+            if(*ent->d_name != '.')
+            {
+                levels.push_back(ent->d_name);
+            }
+            
+        }
+        closedir(dir);
+    } 
+    else
+    {
+        cerr<<"ERRORE apertura cartella";
+    }
+    levels.sort();
 }

@@ -1,9 +1,8 @@
 #include "../Header/Map.h"
-#include <dirent.h>
 
 Map::Map(){}
 
-Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* b): 
+Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* b, string &p): 
 rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
 {
     saturation = al_load_bitmap("../Images/prova.png");
@@ -19,29 +18,7 @@ rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
         cout<<"failed background bw";
         return;
     }
-
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir ("/home/simone/Scrivania/ComputerInfection/maps")) != NULL)
-    {
-        while ((ent = readdir (dir)) != NULL)
-        {
-            if(*ent->d_name != '.')
-            {
-                levels.push(ent->d_name);
-                cout<<ent->d_name<<endl;
-            }
-            
-        }
-        closedir(dir);
-    } 
-    else
-    {
-        cerr<<"ERRORE apertura cartella";
-    }
-    load_map();
-    //levels.push("/home/simone/Scrivania/ComputerInfection/maps/map1.txt");
-    //levels.push("/home/simone/Scrivania/ComputerInfection/maps/map2.txt");
+    load_map(p);
 }
 
 Map::~Map()
@@ -144,17 +121,12 @@ void Map::clearMap()
         }
     }
 }
-bool Map::load_map()
+void Map::load_map(string &path)
 {
     percent = 0.0;
     contEnemies = 0;
     contSeven = 0;
-    if(levels.empty())
-    {
-        return true;
-    }
-    ifstream map("../maps/" + levels.front());
-    levels.pop();
+    ifstream map("../maps/" + path);
     char ch;
     int c;
     int i = 0;
@@ -170,7 +142,6 @@ bool Map::load_map()
         }
     }
     map.close();
-    return false;
 }
 int Map::getRowsMax() const { return rowsMax; }
 int Map::getRowsMin() const { return rowsMin; }
