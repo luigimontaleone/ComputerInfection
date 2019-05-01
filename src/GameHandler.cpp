@@ -1,6 +1,6 @@
 #include "../Header/GameHandler.h"
 
-GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false),redraw(true), lastOne(true), firstOne(true)
+GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false), redraw(true), lastOne(true), firstOne(true)
 {
     font = al_load_ttf_font("../Font/Computerfont.ttf", 40, 0);
     event_queue = al_create_event_queue();
@@ -8,11 +8,12 @@ GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false),redraw(true), lastOn
     map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", (char*)"../Images/board.png");
     borderHandler = new BorderHandler();
     collisionHandler = new CollisionHandler();
-    map->load_map("../maps/map1.txt");
     scale();
     initPos();
+    esci = false;
     map->setContEnemies(enemies.size());
 }
+bool a = false;
 void GameHandler::Game()
 {
     map->printBG();
@@ -21,7 +22,7 @@ void GameHandler::Game()
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
     ALLEGRO_EVENT ev, evPrec;
-    while(1)
+    while(!esci)
     {
         al_wait_for_event(event_queue, &ev);
         if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
@@ -39,12 +40,30 @@ void GameHandler::Game()
             {
                 if(enemies[i]->getAlive())
                 {
-                    moveEnemy(i, false); 
+                    //moveEnemy(i, false); 
                 }
             }
             moveEnemy(0, true);
             if(player->getLives() <= 0)
                 break;
+            if(map->getPercent() >= 75)
+            {
+                pressedSpaceBar = false;
+                for(int i = 0; i < enemies.size(); i++)
+                {
+                    delete enemies[i];
+                }
+                enemies.clear();
+                delete player;
+                delete boss;
+                if(map->load_map())
+                {
+                    esci = true;
+                    cout<<"vuota";
+                    break;
+                }
+                initPos();
+            }
             if(pressedSpaceBar)
             {
                 player->setCutting(true);
@@ -57,8 +76,6 @@ void GameHandler::Game()
                 {
                     firstOne = true;
                     movePlayer(evPrec);
-                    if(map->getPercent() >= 75)
-                        break;
                 }
                 else
                 {
@@ -82,7 +99,19 @@ void GameHandler::Game()
                     player->popBackPassi();
                 }
             }         
-        }      
+        }
+        if(ev.type == ALLEGRO_EVENT_KEY_UP && ev.keyboard.keycode == ALLEGRO_KEY_H)
+        {
+            for(int i = 0; i < map->getMaximumRows(); i++)
+            {
+                for(int j = 0; j < map->getMaximumCols(); j++)
+                {
+                    cout<<map->readFromMap(i,j);
+                }
+                cout<<endl;
+            }
+        }
+     
         if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
             evPrec = ev;
         
@@ -92,7 +121,7 @@ void GameHandler::Game()
         if(ev.type == ALLEGRO_EVENT_KEY_UP)
             evPrec.keyboard.keycode = 80;
         
-        if (redraw && al_is_event_queue_empty(event_queue))
+        if (redraw && al_is_event_queue_empty(event_queue) && !esci)
         {
             redraw = false;           
             map->printBG();
@@ -146,7 +175,7 @@ void GameHandler::initPos()
                 boss = new Enemy(j * 15 + 200, i * 15 , "../Images/enemy.png", true, 3);
                 createBoss = false;
             }
-            else if (map->readFromMap(i,j) == 4 && enemies.size() < 9)
+            else if (map->readFromMap(i,j) == 4)
             {
                 enemies.push_back(new Enemy(j * 15 + 200, i * 15, "../Images/enemy2.png", false, 3));
             }
@@ -657,8 +686,10 @@ GameHandler::~GameHandler()
     al_destroy_event_queue(event_queue);
     al_destroy_font(font);
     al_destroy_timer(timer);
+    /*
     delete player;
     delete boss;
+    */
     delete map;
     delete collisionHandler;
     delete borderHandler;

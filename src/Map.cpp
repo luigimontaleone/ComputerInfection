@@ -1,11 +1,11 @@
 #include "../Header/Map.h"
+#include <dirent.h>
 
 Map::Map(){}
 
 Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* b): 
-rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax), percent(0.0), contEnemies(0)
+rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
 {
-    contSeven = 0;
     saturation = al_load_bitmap("../Images/prova.png");
     border = al_load_bitmap(b);
     if (!border)
@@ -20,6 +20,28 @@ rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax), percent(
         return;
     }
 
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir ("/home/simone/Scrivania/ComputerInfection/maps")) != NULL)
+    {
+        while ((ent = readdir (dir)) != NULL)
+        {
+            if(*ent->d_name != '.')
+            {
+                levels.push(ent->d_name);
+                cout<<ent->d_name<<endl;
+            }
+            
+        }
+        closedir(dir);
+    } 
+    else
+    {
+        cerr<<"ERRORE apertura cartella";
+    }
+    load_map();
+    //levels.push("/home/simone/Scrivania/ComputerInfection/maps/map1.txt");
+    //levels.push("/home/simone/Scrivania/ComputerInfection/maps/map2.txt");
 }
 
 Map::~Map()
@@ -108,36 +130,7 @@ void Map::updateRows_Cols()
             colonnaMin = false;
         }
     }
-    /*for(int i = (rowsMax-1); i >= rowsMin; i--)
-    {
-        bool rigaNonMassima = true;
-        for(int j = colsMin; j < colsMax; j++)
-        {
-            if(logic_map[i][j] == 0)
-                rigaNonMassima = false;
-
-        }
-        if( !rigaNonMassima  && rigaMax)
-        {
-            rowsMax = (i + 2);
-            rigaMax = false;
-        }
-    }
-    for(int i = (colsMax-1); i >= colsMin; i--)
-    {
-        bool colonnaNonMassima = true;
-        for(int j = rowsMin; j < rowsMax; j++)
-        {
-            if(logic_map[i][j] == 0)
-                colonnaNonMassima = false;
-
-        }
-        if(!colonnaNonMassima  && colonnaMax)
-        {
-            colsMax = (i + 2);
-            colonnaMax = false;
-        }
-    }*/
+    
 }
 
 void Map::clearMap()
@@ -151,9 +144,17 @@ void Map::clearMap()
         }
     }
 }
-void Map::load_map(string path)
+bool Map::load_map()
 {
-    ifstream map(path);
+    percent = 0.0;
+    contEnemies = 0;
+    contSeven = 0;
+    if(levels.empty())
+    {
+        return true;
+    }
+    ifstream map("../maps/" + levels.front());
+    levels.pop();
     char ch;
     int c;
     int i = 0;
@@ -169,6 +170,7 @@ void Map::load_map(string path)
         }
     }
     map.close();
+    return false;
 }
 int Map::getRowsMax() const { return rowsMax; }
 int Map::getRowsMin() const { return rowsMin; }

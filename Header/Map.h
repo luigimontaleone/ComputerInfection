@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <queue>
 
 
 using namespace std;
@@ -14,6 +15,7 @@ class Map
         ALLEGRO_BITMAP *background_bw;
         ALLEGRO_BITMAP *border;
         ALLEGRO_BITMAP *saturation;
+        queue<string> levels;
         int logic_map[40][40];
         int rowsMax;
         int rowsMin;
@@ -34,7 +36,7 @@ class Map
         void writeOnMap(int, int, int);
         int readFromMap(int, int) const;
         void clearMap();
-        void load_map(string);
+        bool load_map();
         int getRowsMax() const;
         int getRowsMin() const;
         int getColsMax() const;

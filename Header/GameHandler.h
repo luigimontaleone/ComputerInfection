@@ -26,6 +26,8 @@ class GameHandler
         int height;
         bool redraw;
         bool firstOne;
+
+        bool esci;
         bool lastOne;
         bool pressedSpaceBar;
         bool playerCutting(int&, int&);
