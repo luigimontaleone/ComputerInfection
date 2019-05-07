@@ -16,7 +16,6 @@ GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false), redraw(true), lastO
     exit_clause = false;
     map->setContEnemies(enemies.size());
 }
-bool a = false;
 void GameHandler::Game()
 {
     map->printBG();
@@ -43,12 +42,16 @@ void GameHandler::Game()
             {
                 if(enemies[i]->getAlive())
                 {
-                    //moveEnemy(i, false); 
+                    moveEnemy(i, false); 
                 }
             }
             moveEnemy(0, true);
             if(player->getLives() <= 0)
             {
+                string end = "HAI PERSO";
+                al_draw_text(font, al_map_rgb(255,255,255), 550,
+                    300, 0, end.c_str());
+                al_rest(3);
                 exit_clause = true;
                 break;
             }
@@ -66,9 +69,13 @@ void GameHandler::Game()
                 if(levels.empty())
                 {
                     exit_clause = true;
-                    cout<<"vuota"<<endl;
+                    string end = "HAI VINTO";
+                    al_draw_text(font, al_map_rgb(255,255,255), (disp_data.width/2)+150,
+                    (disp_data.height/2)-50, 0, end.c_str());
+                    al_rest(3);
                     break;
                 }
+                al_rest(3);
                 map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", 
                 (char*)"../Images/board.png", levels.front());
                 levels.pop_front();
