@@ -2,17 +2,17 @@
 
 Map::Map(){}
 
-Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, char* bgBW, char* b, string &p): 
+Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, string bgBW, string b, string &p): 
 rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
 {
     saturation = al_load_bitmap("../Images/prova.png");
-    border = al_load_bitmap(b);
+    border = al_load_bitmap(b.c_str());
     if (!border)
     {
         cout<<"failed border bitmap";
         return;
     }
-    background_bw = al_load_bitmap(bgBW);
+    background_bw = al_load_bitmap(bgBW.c_str());
     if (!background_bw)
     {
         cout<<"failed background bw";
@@ -118,6 +118,8 @@ void Map::clearMap()
         {
             if(logic_map[i][j] == -2)
                 logic_map[i][j] = 0;
+            //if(logic_map[i][j] == -1)
+                //logic_map[i][j] = 1;
         }
     }
 }

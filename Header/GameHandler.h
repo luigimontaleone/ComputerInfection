@@ -25,8 +25,9 @@ class GameHandler
         list<string> levels;
         BorderHandler *borderHandler;
         const float FPS;        
-        int width;
-        int height;
+        int screenWidth;
+        int screenHeight;
+        int num_stage;
         bool redraw;
         bool firstOne;
         bool exit_clause;

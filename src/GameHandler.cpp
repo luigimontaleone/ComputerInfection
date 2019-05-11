@@ -1,13 +1,13 @@
 #include "../Header/GameHandler.h"
 
-GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false), redraw(true), lastOne(true), firstOne(true)
+GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false), redraw(true), lastOne(true),
+ firstOne(true), num_stage(1)
 {
     setLevels();
     font = al_load_ttf_font("../Font/score.ttf", 35, 0);
     event_queue = al_create_event_queue();
     timer = al_create_timer(1.0 / FPS);
-    map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", 
-    (char*)"../Images/board.png", levels.front());
+    map = new Map(0, 40, 0, 40, "../Images/backgroundBW.png", "../Images/board.png", levels.front());
     levels.pop_front();
     borderHandler = new BorderHandler();
     collisionHandler = new CollisionHandler();
@@ -18,13 +18,18 @@ GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false), redraw(true), lastO
 }
 void GameHandler::Game()
 {
+    string stage = "STAGE "+to_string(num_stage);
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_draw_text(font, al_map_rgb(255,0,0), screenWidth/2 - 100, screenHeight/2 - 100, 0, stage.c_str());
+    al_flip_display();
+    al_rest(3);
     map->printBG();
     al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
     ALLEGRO_EVENT ev, evPrec;
-    while(!exit_clause)
+    while(true)//!exit_clause)
     {
         al_wait_for_event(event_queue, &ev);
         if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
@@ -48,11 +53,11 @@ void GameHandler::Game()
             moveEnemy(0, true);
             if(player->getLives() <= 0)
             {
-                string end = "HAI PERSO";
-                al_draw_text(font, al_map_rgb(255,255,255), 550,
-                    300, 0, end.c_str());
+                al_clear_to_color(al_map_rgb(0, 0, 0));
+                al_draw_text(font, al_map_rgb(255,0,0), screenWidth/2 - 100, screenHeight/2 - 100, 0, "HAI PERSO");
+                al_flip_display();
                 al_rest(3);
-                exit_clause = true;
+                //exit_clause = true;
                 break;
             }
             if(map->getPercent() >= 75)
@@ -68,16 +73,23 @@ void GameHandler::Game()
                 delete map;
                 if(levels.empty())
                 {
+                    ALLEGRO_COLOR color = al_map_rgb(255,0,0);
                     exit_clause = true;
-                    string end = "HAI VINTO";
-                    al_draw_text(font, al_map_rgb(255,255,255), (disp_data.width/2)+150,
-                    (disp_data.height/2)-50, 0, end.c_str());
+                    //string end = ;
+                    al_clear_to_color(al_map_rgb(0, 0, 0));
+                    al_draw_text(font, color, screenWidth/2 - 100, screenHeight/2 - 100, 0, "HAI VINTO");
+                    al_flip_display();
                     al_rest(3);
                     break;
                 }
+                num_stage++;
+                stage = "STAGE "+to_string(num_stage);
+                al_clear_to_color(al_map_rgb(0, 0, 0));
+                al_draw_text(font, al_map_rgb(255,0,0), screenWidth/2 - 100, screenHeight/2 - 100, 0, stage.c_str());
+                al_flip_display();
                 al_rest(3);
-                map = new Map(0, 40, 0, 40, (char*)"../Images/backgroundBW.png", 
-                (char*)"../Images/board.png", levels.front());
+                map = new Map(0, 40, 0, 40, "../Images/backgroundBW.png",
+                "../Images/board.png", levels.front());
                 levels.pop_front();
                 initPos();
                 map->setContEnemies(enemies.size());
@@ -85,7 +97,7 @@ void GameHandler::Game()
             if(pressedSpaceBar)
             {
                 player->setCutting(true);
-                movePlayer(evPrec);
+                movePlayer(evPrec);    
             }
             else
             {
@@ -118,6 +130,7 @@ void GameHandler::Game()
                 }
             }         
         }
+        /*DEBUG*/
         if(ev.type == ALLEGRO_EVENT_KEY_UP && ev.keyboard.keycode == ALLEGRO_KEY_H)
         {
             for(int i = 0; i < map->getMaximumRows(); i++)
@@ -129,6 +142,7 @@ void GameHandler::Game()
                 cout<<endl;
             }
         }
+        /*END DEBUG*/
      
         if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
             evPrec = ev;
@@ -137,9 +151,9 @@ void GameHandler::Game()
             pressedSpaceBar = false;
         
         if(ev.type == ALLEGRO_EVENT_KEY_UP)
-            evPrec.keyboard.keycode = 80;
-        
-        if (redraw && al_is_event_queue_empty(event_queue) && !exit_clause)
+            evPrec.keyboard.keycode = ALLEGRO_KEY_A; //viene impostato ad un valore "casuale" così 
+                                                    // da non continuare a camminare, viene usato come "stop"
+        if (redraw && al_is_event_queue_empty(event_queue)) //&& !exit_clause)
         {
             redraw = false;           
             map->printBG();
@@ -163,10 +177,10 @@ void GameHandler::scale()
 {
     al_get_display_mode(0, &disp_data);
     al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
-    width = disp_data.width;
-    height = disp_data.height;
-    int screenWidth = 816;
-    int screenHeight = 600;
+    int width = disp_data.width;
+    int height = disp_data.height;
+    screenWidth = 816;
+    screenHeight = 600;
     float scaleX = (width / (float) screenWidth);
     float scaleY = (height / (float) screenHeight);
     display = al_create_display(width, height);
@@ -181,17 +195,15 @@ void GameHandler::scale()
 }
 void GameHandler::initPos()
 {
-    bool createBoss = true;
-    bool createPlayer = true;
+    bool createPlayer = true; //per distinguere il player con il bordo, entrambi hanno codice 1
     for (int i = map->getRowsMin(); i < map->getRowsMax(); i++)
     {
         for (int j = map->getColsMin(); j < map->getColsMax(); j++)
         {
 
-            if (map->readFromMap(i,j) == 3 && createBoss)
+            if (map->readFromMap(i,j) == 3) 
             {
                 boss = new Enemy(j * 15 + 200, i * 15 , "../Images/enemy.png", true, 3);
-                createBoss = false;
             }
             else if (map->readFromMap(i,j) == 4)
             {
@@ -322,54 +334,88 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
         
         if(sostituisci)
         {
+            bool borderCutting = false;
             pressedSpaceBar = false;
             player->aggiungiPassiX((player->getX() - 200) / 15);
             player->aggiungiPassiY((player->getY()) / 15);
-            
-            int medioY = 0;
-            int medioX = 0;
-            for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
+            if(player->getPassiX().size() >= 2)
             {
-                bool found = false;
-                for(int j = map->getColsMin(); j < map->getColsMax(); j++)
-                {
-                    
-                    bool uguale = false;
-                    for(int p = 0; p < player->getPassiY().size(); p++)
-                    {
-                        if(player->getPassiY()[p] == i && player->getPassiX()[p] == j)
-                        {
-                            uguale = true;
-                            break;
-                        }
-                    }
-                    if(!uguale && map->readFromMap(i, j) != 7 && map->readFromMap(i, j) != 1 && !found
-                    && map->readFromMap(i, j) != 4)
-                    { 
-                        bool ctrl = true;
-                        borderHandler->floodFillControllo(i, j, -2, -1, ctrl, map);
-                        map->clearMap();
-                        if(ctrl)
-                        {
-                            medioX = j;
-                            medioY = i;
-                            found = true;
-                        }
-                    }                    
-                }
-                if(found)
-                    break;
+                if(map->readFromMap(player->getPassiX()[1],player->getPassiY()[1]) == 1)
+                    borderCutting = true;
             }
-            borderHandler->floodFill(medioY, medioX, 7, -1, map);                
-            for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
+            for(int i = 0; i < player->getPassiX().size(); i++)
+                cout<<map->readFromMap(player->getPassiX()[i],player->getPassiY()[i])<<endl;
+            cout<<endl;
+            cout<<"vite "<<player->getLives()<<endl<<endl;
+            if(!borderCutting)
+            {
+                int medioY = 0;
+                int medioX = 0;
+                for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
+                {
+                    bool found = false;
+                    for(int j = map->getColsMin(); j < map->getColsMax(); j++)
+                    {
+                        
+                        bool uguale = false;
+                        for(int p = 0; p < player->getPassiY().size(); p++)
+                        {
+                            if(player->getPassiY()[p] == i && player->getPassiX()[p] == j)
+                            {
+                                uguale = true;
+                                break;
+                            }
+                        }
+                        if(!uguale && map->readFromMap(i, j) != 7 && map->readFromMap(i, j) != 1 && !found
+                        && map->readFromMap(i, j) != 4)
+                        { 
+                            bool ctrl = true;
+                            borderHandler->floodFillControllo(i, j, -2, -1, ctrl, map);
+                            map->clearMap();
+                            if(ctrl)
+                            {
+                                medioX = j;
+                                medioY = i;
+                                found = true;
+                            }
+                        }                    
+                    }
+                    if(found)
+                        break;
+                }
+                borderHandler->floodFill(medioY, medioX, 7, -1, map); 
+                for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
+                {
+                    for(int j = map->getColsMin(); j < map->getColsMax(); j++)
+                    {
+                        if(map->readFromMap(i, j) == -1)
+                            map->writeOnMap(i, j, 1);
+                    }
+                }
+                player->svuotaPassi();
+               
+            }
+            else
+            {
+                //map->writeOnMap(player->getY() / 15, (player->getX() - 200) / 15, 1);
+                while(player->getPassiX().size() > 0)
+                {
+                    int x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
+                    int y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
+                    map->writeOnMap(y_tmp, x_tmp, 1);
+                    player->popBackPassi();
+                }
+            }
+            /*for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
             {
                 for(int j = map->getColsMin(); j < map->getColsMax(); j++)
                 {
                     if(map->readFromMap(i, j) == -1)
                         map->writeOnMap(i, j, 1);
                 }
-            }
-            player->svuotaPassi();
+            }*/
+            //map->clearMap();
+            //player->svuotaPassi();
             firstOne = true;
             map->updateRows_Cols();
             map->updatePercent();
@@ -499,17 +545,20 @@ void GameHandler::moveEnemy(int i, bool is_boss)
         int y_tmp = player->getPassiY()[0];
         player->setX((x_tmp * 15) + 200);
         player->setY(y_tmp * 15);
-        while(player->getPassiX().size() > 1)
+        while(player->getPassiX().size() > 0)
         {
             x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
             y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
-            map->writeOnMap(y_tmp, x_tmp, 0);
+            if(player->getPassiX().size() > 1)
+                map->writeOnMap(y_tmp, x_tmp, 0);
+            else
+                map->writeOnMap(y_tmp, x_tmp, 1);
             player->popBackPassi();
         }
-        x_tmp = player->getPassiX()[0];
-        y_tmp = player->getPassiY()[0];
-        map->writeOnMap(y_tmp, x_tmp, 1);
-        player->popBackPassi();
+        //x_tmp = player->getPassiX()[0];
+        //y_tmp = player->getPassiY()[0];
+        //map->writeOnMap(y_tmp, x_tmp, 1);
+        //player->popBackPassi();
     }
     
     else if(collisione && (enemies[i]->getAlive() || is_boss))

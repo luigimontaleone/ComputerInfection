@@ -24,7 +24,7 @@ class Map
         const int maximumCols = 40;
     public:
         Map();
-        Map(int, int, int, int, char*, char*, string&);
+        Map(int, int, int, int, string, string, string&);
         ~Map();
         void printBG() const;
         void printBorder() const;
