@@ -18,14 +18,6 @@ bool CollisionHandler::enemyCollision(bool is_boss, const Map* map, int x, int y
         x2 = (x2 - 200 + 32) / 15;
         y2 = (y2 + 32) / 15;
     }
-    //if( x >= map->getMaximumCols() || y >= map->getMaximumRows() || x < 0 || y < 0)
-      //  return false;
-
-    /*if(map->readFromMap(y,x) == 0 || map->readFromMap(y2,x) == 0 || map->readFromMap(y,x2) == 0
-    || map->readFromMap(y2,x2) == 0 || map->readFromMap(y,x) == 3 || map->readFromMap(y2,x) == 3 
-    || map->readFromMap(y,x2) == 3 || map->readFromMap(y2,x2) == 3 || map->readFromMap(y,x) == 4 
-    || map->readFromMap(y2,x) == 4 || map->readFromMap(y,x2) == 4 || map->readFromMap(y2,x2) == 4)
-        return true;*/
 
     if(map->readFromMap(y, x) == -1 || map->readFromMap(y2, x) == -1 || map->readFromMap(y, x2) == -1
     || map->readFromMap(y2, x2) == -1)

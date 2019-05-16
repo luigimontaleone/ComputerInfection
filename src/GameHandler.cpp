@@ -45,6 +45,11 @@ void GameHandler::Game()
             redraw = true;
             for(int i = 0; i < enemies.size(); i++)
             {
+                cout<<enemies[i]->getAlive()<<" ";
+            }
+            cout<<endl;
+            for(int i = 0; i < enemies.size(); i++)
+            {
                 if(enemies[i]->getAlive())
                 {
                     moveEnemy(i, false); 
@@ -71,6 +76,7 @@ void GameHandler::Game()
                 delete player;
                 delete boss;
                 delete map;
+                al_flush_event_queue(event_queue);
                 if(levels.empty())
                 {
                     ALLEGRO_COLOR color = al_map_rgb(255,0,0);
@@ -171,6 +177,7 @@ void GameHandler::Game()
             al_clear_to_color(al_map_rgb(0, 0, 0));
         }
     }
+    al_flush_event_queue(event_queue);
     al_destroy_display(display);
 }
 void GameHandler::scale()
@@ -343,10 +350,10 @@ void GameHandler::movePlayer(ALLEGRO_EVENT ev)
                 if(map->readFromMap(player->getPassiX()[1],player->getPassiY()[1]) == 1)
                     borderCutting = true;
             }
-            for(int i = 0; i < player->getPassiX().size(); i++)
-                cout<<map->readFromMap(player->getPassiX()[i],player->getPassiY()[i])<<endl;
-            cout<<endl;
-            cout<<"vite "<<player->getLives()<<endl<<endl;
+            //for(int i = 0; i < player->getPassiX().size(); i++)
+            //    cout<<map->readFromMap(player->getPassiX()[i],player->getPassiY()[i])<<endl;
+         //   cout<<endl;
+          //  cout<<"vite "<<player->getLives()<<endl<<endl;
             if(!borderCutting)
             {
                 int medioY = 0;
@@ -479,49 +486,57 @@ void GameHandler::moveEnemy(int i, bool is_boss)
     switch (dir)
     {
         case 1:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
+             || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 2:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
+            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }            
             break;
         case 3:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
+            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 4:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
+            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 5:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
+            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 6:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
+            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 7:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
+            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
             break;
         case 8:
-            if((!collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy)) || (!collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
+            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
+            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
             {
                 collisione = true;
             }
@@ -531,6 +546,7 @@ void GameHandler::moveEnemy(int i, bool is_boss)
     }
     if(hit_enemy)
     {
+        cout<<"ciao"<<endl;
         enemies[i]->die();
     }
     else if(hit_player)
