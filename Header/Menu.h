@@ -12,9 +12,6 @@ using namespace std;
 class Menu
 {
     private:
-    ALLEGRO_DISPLAY *menuDisplay;
-    ALLEGRO_DISPLAY_MODE disp_data;
-    ALLEGRO_TRANSFORM trans;
     ALLEGRO_MOUSE_EVENT eventMouse;
     ALLEGRO_EVENT_QUEUE *menuEventsQueue;
     ALLEGRO_TIMER *timer;
@@ -28,11 +25,10 @@ class Menu
     int sizeChoices;
 
     public:
-    Menu();
+    Menu(int, int, float, float);
     ~Menu();
     int showMenu() const;
-    void initDisplay();
-    void closeDisplay();
+    void showCredits() const;
 
     static const int EXIT = 0;
     static const int PLAY = 1;

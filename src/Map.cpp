@@ -2,7 +2,7 @@
 
 Map::Map(){}
 
-Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, string bgBW, string b, string &p): 
+Map::Map(int rowsMin, int rowsMax, int colsMin, int colsMax, string bgBW, string b, string path): 
 rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
 {
     saturation = al_load_bitmap("../Images/prova.png");
@@ -18,7 +18,7 @@ rowsMin(rowsMin), rowsMax(rowsMax), colsMin(colsMin), colsMax(colsMax)
         cout<<"failed background bw";
         return;
     }
-    load_map(p);
+    load_map(path);
 }
 
 Map::~Map()
@@ -123,7 +123,7 @@ void Map::clearMap()
         }
     }
 }
-void Map::load_map(string &path)
+void Map::load_map(string path)
 {
     percent = 0.0;
     contEnemies = 0;

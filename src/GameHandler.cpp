@@ -1,34 +1,31 @@
 #include "../Header/GameHandler.h"
 
-GameHandler::GameHandler(): FPS(30), pressedSpaceBar(false), redraw(true), lastOne(true),
- firstOne(true), num_stage(1)
+GameHandler::GameHandler( int displayW, int displayH): FPS(30), pressedSpaceBar(false), redraw(true), lastOne(true),
+screenWidth(displayW), screenHeight(displayH)
 {
-    setLevels();
     font = al_load_ttf_font("../Font/score.ttf", 35, 0);
+    level = new Level(font, screenWidth, screenHeight);
     event_queue = al_create_event_queue();
     timer = al_create_timer(1.0 / FPS);
-    map = new Map(0, 40, 0, 40, "../Images/backgroundBW.png", "../Images/board.png", levels.front());
-    levels.pop_front();
-    borderHandler = new BorderHandler();
-    collisionHandler = new CollisionHandler();
-    scale();
+    map = new Map(0, 40, 0, 40, "../Images/backgroundBW.png", "../Images/board.png", level->front());
+    level->pop_front();
+    playerMovement = new PlayerMovement();
+    enemyMovement = new EnemyMovement();
     initPos();
-    exit_clause = false;
     map->setContEnemies(enemies.size());
 }
 void GameHandler::Game()
 {
-    string stage = "STAGE "+to_string(num_stage);
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_draw_text(font, al_map_rgb(255,0,0), screenWidth/2 - 100, screenHeight/2 - 100, 0, stage.c_str());
-    al_flip_display();
-    al_rest(3);
+    level->newLevel();
     map->printBG();
-    al_register_event_source(event_queue, al_get_display_event_source(display));
+    al_register_event_source(event_queue, al_get_display_event_source(al_get_current_display()));
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
+    ALLEGRO_EVENT_QUEUE *timer_queue;
+    timer_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
-    ALLEGRO_EVENT ev, evPrec;
+    ALLEGRO_EVENT ev, evPrec, timer;
+    ALLEGRO_KEYBOARD_STATE state;
     while(true)//!exit_clause)
     {
         al_wait_for_event(event_queue, &ev);
@@ -39,23 +36,31 @@ void GameHandler::Game()
         if(ev.keyboard.keycode == ALLEGRO_KEY_SPACE)
         {
             pressedSpaceBar = true;
-        }        
+        }
+        al_get_keyboard_state(&state);
+            if(al_key_down(&state, ALLEGRO_KEY_SPACE))
+                pressedSpaceBar = true;
+            else
+                pressedSpaceBar = false;
+            if(al_key_down(&state, ALLEGRO_KEY_UP))
+                evPrec.keyboard.keycode = ALLEGRO_KEY_UP;
+            if(al_key_down(&state, ALLEGRO_KEY_DOWN))
+                evPrec.keyboard.keycode = ALLEGRO_KEY_DOWN;
+            if(al_key_down(&state, ALLEGRO_KEY_RIGHT))
+                evPrec.keyboard.keycode = ALLEGRO_KEY_RIGHT;
+            if(al_key_down(&state, ALLEGRO_KEY_LEFT))
+                evPrec.keyboard.keycode = ALLEGRO_KEY_LEFT;        
         if(ev.type == ALLEGRO_EVENT_TIMER)
         {
             redraw = true;
             for(int i = 0; i < enemies.size(); i++)
             {
-                cout<<enemies[i]->getAlive()<<" ";
-            }
-            cout<<endl;
-            for(int i = 0; i < enemies.size(); i++)
-            {
                 if(enemies[i]->getAlive())
                 {
-                    moveEnemy(i, false); 
+                    enemyMovement->movement(enemies[i], player, map, pressedSpaceBar); 
                 }
             }
-            moveEnemy(0, true);
+            enemyMovement->movement(boss, player, map, pressedSpaceBar);
             if(player->getLives() <= 0)
             {
                 al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -77,41 +82,32 @@ void GameHandler::Game()
                 delete boss;
                 delete map;
                 al_flush_event_queue(event_queue);
-                if(levels.empty())
+                if(level->empty())
                 {
                     ALLEGRO_COLOR color = al_map_rgb(255,0,0);
-                    exit_clause = true;
-                    //string end = ;
                     al_clear_to_color(al_map_rgb(0, 0, 0));
                     al_draw_text(font, color, screenWidth/2 - 100, screenHeight/2 - 100, 0, "HAI VINTO");
                     al_flip_display();
                     al_rest(3);
                     break;
                 }
-                num_stage++;
-                stage = "STAGE "+to_string(num_stage);
-                al_clear_to_color(al_map_rgb(0, 0, 0));
-                al_draw_text(font, al_map_rgb(255,0,0), screenWidth/2 - 100, screenHeight/2 - 100, 0, stage.c_str());
-                al_flip_display();
-                al_rest(3);
-                map = new Map(0, 40, 0, 40, "../Images/backgroundBW.png",
-                "../Images/board.png", levels.front());
-                levels.pop_front();
+                level->newLevel();
+                map = new Map(0, 40, 0, 40, "../Images/backgroundBW.png", "../Images/board.png", level->front());
+                level->pop_front();
                 initPos();
                 map->setContEnemies(enemies.size());
             }
             if(pressedSpaceBar)
             {
                 player->setCutting(true);
-                movePlayer(evPrec);    
+                playerMovement->movement(player, map, evPrec, pressedSpaceBar);   
             }
             else
             {
                 player->setCutting(false);
                 if(player->getPassiX().empty())
                 {
-                    firstOne = true;
-                    movePlayer(evPrec);
+                    playerMovement->movement(player, map, evPrec, pressedSpaceBar);
                 }
                 else
                 {
@@ -136,6 +132,11 @@ void GameHandler::Game()
                 }
             }         
         }
+        else
+        {
+            
+        }
+        
         /*DEBUG*/
         if(ev.type == ALLEGRO_EVENT_KEY_UP && ev.keyboard.keycode == ALLEGRO_KEY_H)
         {
@@ -150,11 +151,9 @@ void GameHandler::Game()
         }
         /*END DEBUG*/
      
-        if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
-            evPrec = ev;
-        
-        if(ev.type == ALLEGRO_EVENT_KEY_UP && ev.keyboard.keycode == ALLEGRO_KEY_SPACE)
-            pressedSpaceBar = false;
+
+        //if(ev.type == ALLEGRO_EVENT_KEY_UP && ev.keyboard.keycode == ALLEGRO_KEY_SPACE)
+          //  pressedSpaceBar = false;
         
         if(ev.type == ALLEGRO_EVENT_KEY_UP)
             evPrec.keyboard.keycode = ALLEGRO_KEY_A; //viene impostato ad un valore "casuale" così 
@@ -178,27 +177,6 @@ void GameHandler::Game()
         }
     }
     al_flush_event_queue(event_queue);
-    al_destroy_display(display);
-}
-void GameHandler::scale()
-{
-    al_get_display_mode(0, &disp_data);
-    al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
-    int width = disp_data.width;
-    int height = disp_data.height;
-    screenWidth = 816;
-    screenHeight = 600;
-    float scaleX = (width / (float) screenWidth);
-    float scaleY = (height / (float) screenHeight);
-    display = al_create_display(width, height);
-    if(!display)
-    {
-        cout<<"failed to create display";
-        return;
-    }
-    al_identity_transform(&trans);
-    al_scale_transform(&trans, scaleX, scaleY);
-    al_use_transform(&trans);
 }
 void GameHandler::initPos()
 {
@@ -224,533 +202,7 @@ void GameHandler::initPos()
         }
     }
 }
-void GameHandler::movePlayer(ALLEGRO_EVENT ev)
-{
-    if(player->getCutting())
-    {
-        bool sostituisci = false;
-        int x2 = 0, y2 = 0;
-        switch(ev.keyboard.keycode)
-        {                           
-            case ALLEGRO_KEY_UP:
-                y2 -= (player->getSpeed());
-                x2 = (player->getX() - 200 + x2) / 15;
-                y2 = (player->getY() + y2) / 15;
-                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
-                    break;
-                if(map->readFromMap(y2, x2) == 1)
-                {
-                    map->writeOnMap(y2, x2, -1);
-                    sostituisci = true;
-                }
-                else
-                {
-                    map->writeOnMap(y2, x2, -1);
-                }
-                if (firstOne)
-                {
-                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
-                    firstOne = false;
-                }
-                player->aggiungiPassiX((player->getX() - 200) / 15);
-                player->aggiungiPassiY((player->getY()) / 15);
-                player->moveUp();
-                break;
-            case ALLEGRO_KEY_DOWN:
-                y2 += (player->getSpeed());
-                x2 = (player->getX() - 200 + x2) / 15;
-                y2 = (player->getY() + y2) / 15;
-                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
-                    break;
-                if(map->readFromMap(y2, x2) == 1) 
-                {
-                    map->writeOnMap(y2, x2, -1);
-                    sostituisci = true;
-                }
-                else
-                {
-                    map->writeOnMap(y2, x2, -1);
-                }
-                if (firstOne)
-                {
-                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
-                    firstOne = false;
-                }
-                
-                player->aggiungiPassiX((player->getX() - 200) / 15);
-                player->aggiungiPassiY((player->getY()) / 15);
-                player->moveDown();
-                break;
-            case ALLEGRO_KEY_LEFT:
-                x2 -= (player->getSpeed());
-                x2 = (player->getX() - 200 + x2) / 15;
-                y2 = (player->getY() + y2) / 15;
-                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7)
-                    break;
-                if(map->readFromMap(y2, x2) == 1) 
-                {
-                    map->writeOnMap(y2, x2, -1);
-                    sostituisci = true;
-                }
-                else
-                {
-                    map->writeOnMap(y2, x2, -1);
-                }
-                if (firstOne)
-                {
-                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
-                    firstOne = false;
-                }
-                player->aggiungiPassiX((player->getX() - 200) / 15);
-                player->aggiungiPassiY((player->getY()) / 15);
-                player->moveLeft();
-                break;
-            case ALLEGRO_KEY_RIGHT:
-                x2 += (player->getSpeed());
-                x2 = (player->getX() - 200 + x2) / 15;
-                y2 = (player->getY() + y2) / 15;
-                if(x2 > map->getColsMax()-1 || y2 > map->getRowsMax()-1 ||
-                 x2 < map->getColsMin() || y2 < map->getRowsMin() || map->readFromMap(y2, x2) == 7) 
-                    break;
-                if(map->readFromMap(y2, x2) == 1)  
-                {
-                    map->writeOnMap(y2, x2, -1);
-                    sostituisci = true;
-                }
-                else
-                {
-                    map->writeOnMap(y2, x2, -1);
-                }
-                if (firstOne)
-                {
-                    map->writeOnMap((player->getY()) / 15, (player->getX() - 200) / 15, -1);
-                    firstOne = false;
-                }
-                player->aggiungiPassiX((player->getX() - 200) / 15);
-                player->aggiungiPassiY((player->getY()) / 15);
-                player->moveRight();
-                break;
-            default:
-                break;
-        }
 
-        map->printBorder();     
-        
-        if(sostituisci)
-        {
-            bool borderCutting = false;
-            pressedSpaceBar = false;
-            player->aggiungiPassiX((player->getX() - 200) / 15);
-            player->aggiungiPassiY((player->getY()) / 15);
-            if(player->getPassiX().size() >= 2)
-            {
-                if(map->readFromMap(player->getPassiX()[1],player->getPassiY()[1]) == 1)
-                    borderCutting = true;
-            }
-            //for(int i = 0; i < player->getPassiX().size(); i++)
-            //    cout<<map->readFromMap(player->getPassiX()[i],player->getPassiY()[i])<<endl;
-         //   cout<<endl;
-          //  cout<<"vite "<<player->getLives()<<endl<<endl;
-            if(!borderCutting)
-            {
-                int medioY = 0;
-                int medioX = 0;
-                for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
-                {
-                    bool found = false;
-                    for(int j = map->getColsMin(); j < map->getColsMax(); j++)
-                    {
-                        
-                        bool uguale = false;
-                        for(int p = 0; p < player->getPassiY().size(); p++)
-                        {
-                            if(player->getPassiY()[p] == i && player->getPassiX()[p] == j)
-                            {
-                                uguale = true;
-                                break;
-                            }
-                        }
-                        if(!uguale && map->readFromMap(i, j) != 7 && map->readFromMap(i, j) != 1 && !found
-                        && map->readFromMap(i, j) != 4)
-                        { 
-                            bool ctrl = true;
-                            borderHandler->floodFillControllo(i, j, -2, -1, ctrl, map);
-                            map->clearMap();
-                            if(ctrl)
-                            {
-                                medioX = j;
-                                medioY = i;
-                                found = true;
-                            }
-                        }                    
-                    }
-                    if(found)
-                        break;
-                }
-                borderHandler->floodFill(medioY, medioX, 7, -1, map); 
-                for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
-                {
-                    for(int j = map->getColsMin(); j < map->getColsMax(); j++)
-                    {
-                        if(map->readFromMap(i, j) == -1)
-                            map->writeOnMap(i, j, 1);
-                    }
-                }
-                player->svuotaPassi();
-               
-            }
-            else
-            {
-                //map->writeOnMap(player->getY() / 15, (player->getX() - 200) / 15, 1);
-                while(player->getPassiX().size() > 0)
-                {
-                    int x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
-                    int y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
-                    map->writeOnMap(y_tmp, x_tmp, 1);
-                    player->popBackPassi();
-                }
-            }
-            /*for(int i = map->getRowsMin(); i < map->getRowsMax(); i++)
-            {
-                for(int j = map->getColsMin(); j < map->getColsMax(); j++)
-                {
-                    if(map->readFromMap(i, j) == -1)
-                        map->writeOnMap(i, j, 1);
-                }
-            }*/
-            //map->clearMap();
-            //player->svuotaPassi();
-            firstOne = true;
-            map->updateRows_Cols();
-            map->updatePercent();
-        }
-    }
-    else
-    {
-            switch(ev.keyboard.keycode)
-            {
-                case ALLEGRO_KEY_UP:
-                    if(collisionHandler->playerCollision(map,player->getX(),player->getY() - player->getSpeed()))//collision(player->getX(), player->getY() - player->getSpeed(), true))
-                        player->moveUp();
-                    break;
-                case ALLEGRO_KEY_DOWN:
-                    if(collisionHandler->playerCollision(map,player->getX(),player->getY() + player->getSpeed()))//collision(player->getX(), player->getY() + player->getSpeed(), true))
-                        player->moveDown();
-                    break;
-                case ALLEGRO_KEY_RIGHT:
-                    if(collisionHandler->playerCollision(map,player->getX() + player->getSpeed(),player->getY()))//collision(player->getX() + player->getSpeed(), player->getY(), true))
-                        player->moveRight();
-                    break;
-                case ALLEGRO_KEY_LEFT:
-                    if(collisionHandler->playerCollision(map,player->getX() - player->getSpeed(),player->getY()))//collision(player->getX() - player->getSpeed(), player->getY(), true))
-                        player->moveLeft();
-                    break;
-                default:
-                    break;
-            }        
-    }
-}
-bool GameHandler::playerCutting(int &x, int &y)
-{
-    x = (player->getX() - 200 + x) / 15;
-    y = (player->getY() + y) / 15;
-    if(map->readFromMap(y, x) == 1) 
-    {
-        return true;
-    }
-    else
-    {
-        map->writeOnMap(y, x, -1);
-    }
-    return false;
-      
-}
-void GameHandler::moveEnemy(int i, bool is_boss)
-{
-    bool trovato = false;
-    bool collisione = false;
-    int dir = 0;
-    if (is_boss)
-    {
-        dir = boss->get_dir();
-    }
-    else
-    {
-        dir = enemies[i]->get_dir();
-    }
-    bool hit_player = false;
-    bool hit_enemy = false;
-    switch (dir)
-    {
-        case 1:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
-             || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }
-            break;
-        case 2:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
-            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }            
-            break;
-        case 3:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
-            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }
-            break;
-        case 4:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
-            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }
-            break;
-        case 5:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
-            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }
-            break;
-        case 6:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
-            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }
-            break;
-        case 7:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
-            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }
-            break;
-        case 8:
-            if((is_boss && !collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
-            || (!is_boss && !collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy)))
-            {
-                collisione = true;
-            }
-            break;
-        default:
-            break;
-    }
-    if(hit_enemy)
-    {
-        cout<<"ciao"<<endl;
-        enemies[i]->die();
-    }
-    else if(hit_player)
-    {
-        player->decreaseLives();
-        if(player->getLives() <= 0)
-            return;
-        pressedSpaceBar = false;
-        player->aggiungiPassiX((player->getX() - 200) / 15);
-        player->aggiungiPassiY((player->getY()) / 15);
-        int x_tmp = player->getPassiX()[0];
-        int y_tmp = player->getPassiY()[0];
-        player->setX((x_tmp * 15) + 200);
-        player->setY(y_tmp * 15);
-        while(player->getPassiX().size() > 0)
-        {
-            x_tmp = player->getPassiX()[player->getPassiX().size() - 1 ];
-            y_tmp = player->getPassiY()[player->getPassiY().size() - 1 ];
-            if(player->getPassiX().size() > 1)
-                map->writeOnMap(y_tmp, x_tmp, 0);
-            else
-                map->writeOnMap(y_tmp, x_tmp, 1);
-            player->popBackPassi();
-        }
-        //x_tmp = player->getPassiX()[0];
-        //y_tmp = player->getPassiY()[0];
-        //map->writeOnMap(y_tmp, x_tmp, 1);
-        //player->popBackPassi();
-    }
-    
-    else if(collisione && (enemies[i]->getAlive() || is_boss))
-    {
-        while (!trovato)
-        {
-            int new_dir = (rand() % 8) + 1;
-            switch (new_dir)
-            {
-               
-                case 1:
-                    if(is_boss)
-                    {  
-                        if(collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 2:
-                    if(is_boss)
-                    {
-                        if(collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 3:
-                    if(is_boss)
-                    {
-                        if(collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 4:
-                    if(is_boss)
-                    {
-                        if(collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() + boss->getSpeed(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() + enemies[i]->getSpeed(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 5:
-                    if(is_boss)
-                    {
-                        if(collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 6:
-                    if(is_boss)
-                    {
-                        if(collisionHandler->enemyCollision(true, map, boss->getX() - boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() - enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 7:
-                    if(is_boss)
-                    {
-                        if(collisionHandler->enemyCollision(true, map, boss->getX(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                case 8:
-                    if(is_boss)
-                    {
-                        if(collisionHandler->enemyCollision(true, map, boss->getX() + boss->getSpeed(), boss->getY() - boss->getSpeed(), hit_player, hit_enemy))
-                        {
-                            boss->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    else
-                    {
-                        if(collisionHandler->enemyCollision(false, map, enemies[i]->getX() + enemies[i]->getSpeed(), enemies[i]->getY() - enemies[i]->getSpeed(), hit_player, hit_enemy))
-                        {
-                            enemies[i]->set_dir(new_dir);
-                            trovato = true;
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    if(is_boss)
-    {
-        //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<" ";
-        map->writeOnMap((boss->getY()) / 15, (boss->getX() - 200)/ 15, 0);
-        //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<" ";
-        boss->move();
-        map->writeOnMap((boss->getY()) / 15, (boss->getX() - 200)/ 15, 3);
-        //cout<<map->readFromMap((boss->getY() - 32) / 15, (boss->getX() - 200 - 32)/ 15)<<endl;
-    }
-    else if(enemies[i]->getAlive())
-    {
-        map->writeOnMap(enemies[i]->getY() / 15, (enemies[i]->getX() - 200)/ 15, 0);
-        enemies[i]->move();
-        map->writeOnMap(enemies[i]->getY() / 15, (enemies[i]->getX() - 200)/ 15, 4);
-    }
-
-}
 void GameHandler::printInfo()
 {
     ALLEGRO_COLOR colorFont;
@@ -771,8 +223,9 @@ GameHandler::~GameHandler()
     //delete player;
     //delete boss;
     //delete map;
-    delete collisionHandler;
-    delete borderHandler;
+    delete level;
+    delete playerMovement;
+    delete enemyMovement;
     /*for(int i = 0; i < enemies.size(); i++)
     {
         delete enemies[i];
@@ -780,26 +233,4 @@ GameHandler::~GameHandler()
     event_queue = nullptr;
     font = nullptr;
     timer = nullptr;
-}
-void GameHandler::setLevels()
-{
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir ("../maps")) != NULL)
-    {
-        while ((ent = readdir (dir)) != NULL)
-        {
-            if(*ent->d_name != '.')
-            {
-                levels.push_back(ent->d_name);
-            }
-            
-        }
-        closedir(dir);
-    } 
-    else
-    {
-        cerr<<"ERRORE apertura cartella";
-    }
-    levels.sort();
 }

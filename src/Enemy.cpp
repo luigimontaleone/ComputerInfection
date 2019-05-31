@@ -63,3 +63,8 @@ bool Enemy::getAlive()
 {
     return alive;
 }
+
+bool Enemy::getIsBoss()
+{
+    return is_boss;
+}

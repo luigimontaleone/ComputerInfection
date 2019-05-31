@@ -14,6 +14,7 @@ class Enemy : public Entity
         void set_dir(int dir);
         int get_dir();
         bool getAlive();
+        bool getIsBoss();
         void die();
 };
 #endif

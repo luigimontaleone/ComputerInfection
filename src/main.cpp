@@ -2,6 +2,9 @@
 #include "../Header/Menu.h"
 #include "../Header/Audio.h"
 #include <iostream>
+
+void initDisplay(ALLEGRO_DISPLAY *, int &, int &, float&, float&);
+
 int main()
 {
     if(!al_init())
@@ -51,39 +54,67 @@ int main()
       cerr<<"failed to reserve samples!\n";
       return -1;
     }
-
+    ALLEGRO_DISPLAY *display;
+    int displayW, displayH;
+    float scaleX, scaleY;
+    initDisplay(display, displayW, displayH, scaleX, scaleY);
     Audio *audio = new Audio();
-    Menu *menu = new Menu();
+    Menu *menu = new Menu(displayW, displayH, scaleX, scaleY);
     audio->playMenu();
     int choice = menu->showMenu();
     while(choice != Menu::EXIT)
     {
-        delete menu;
         switch (choice)
         {
             case Menu::PLAY :
             {
+                delete menu;
                 audio->stopMenu();
                 audio->playGame();
-                GameHandler *gamehandler = new GameHandler();
+                GameHandler *gamehandler = new GameHandler(displayW, displayH);
                 gamehandler->Game();
                 delete gamehandler;
                 audio->stopGame();
+                audio->playMenu();
+                menu = new Menu(displayW, displayH, scaleX, scaleY);
                 break;
             }
             case Menu::CREDITS :
             {
+                menu->showCredits();
                 break;
             }
         
             default:
                 break;
         }
-        audio->playMenu();
-        menu = new Menu();
         choice = menu->showMenu();
     }
     delete menu;
     delete audio;
     return 0;
+}
+
+
+void initDisplay(ALLEGRO_DISPLAY *display, int &displayW, int &displayH, float &scaleX, float &scaleY)
+{
+    ALLEGRO_DISPLAY_MODE disp_data;
+    ALLEGRO_TRANSFORM trans;
+    al_get_display_mode(0, &disp_data);
+    al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+    int width = disp_data.width;
+    int height = disp_data.height;
+    displayW = 800;
+    displayH = 600;
+    scaleX = (width / (float) displayW);
+    scaleY = (height / (float) displayH);
+    display = al_create_display(width, height);
+    if(!display)
+    {
+        cout<<"failed to create menu display";
+        return;
+    }
+    al_identity_transform(&trans);
+    al_scale_transform(&trans, scaleX, scaleY);
+    al_use_transform(&trans);
 }

@@ -24,7 +24,7 @@ class Map
         const int maximumCols = 40;
     public:
         Map();
-        Map(int, int, int, int, string, string, string&);
+        Map(int, int, int, int, string, string, string);
         ~Map();
         void printBG() const;
         void printBorder() const;
@@ -32,7 +32,7 @@ class Map
         void writeOnMap(int, int, int);
         int readFromMap(int, int) const;
         void clearMap();
-        void load_map(string&);
+        void load_map(string);
         int getRowsMax() const;
         int getRowsMin() const;
         int getColsMax() const;
